@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  web-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - .:/tienda_front
+      - /tienda_front/node_modules
+    command: npm run dev

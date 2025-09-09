@@ -22,7 +22,7 @@ alta disponibilidad y tiempos de respuesta. Puede incluir Redis, MongoDB o Cassa
     * Utilizar Firebase para el despliegue parcial en la nube.
 - **Lógica de Negocio**:
     * Modulo de productos (scroll infinito)
-        * Categorias, Ofertas, favoritos, recien vistos, recomenciones, comentarios
+        * Categorias, Ofertas, favoritos, recien vistos, recomendaciones, comentarios
     * Módulo usurio (CRUD)
         * Carrito, Compras, Historial, Vender, Ventas
     * Pasarela de pago.
