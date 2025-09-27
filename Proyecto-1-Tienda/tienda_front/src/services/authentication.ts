@@ -1,9 +1,10 @@
-// services/api.ts
+// services/authentication.ts (actualizado)
 import { type RegisterData } from '../context/AuthContext';
 
-const API_BASE_URL = import.meta.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export interface ApiResponse {
+  errors: any;
   success: boolean;
   message?: string;
   token?: string;
@@ -14,7 +15,7 @@ class AuthAPI {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = `${API_BASE_URL}/auth`;
+    this.baseURL = `${API_BASE_URL}/api/auth`;
   }
 
   async login(email: string, password: string): Promise<ApiResponse> {
@@ -27,10 +28,25 @@ class AuthAPI {
         body: JSON.stringify({ email, password }),
       });
 
-      return await response.json();
+      const data = await response.json();
+      
+      if (!response.ok) {
+        return {
+          success: false,
+          message: data.message,
+          errors: data.errors || []
+        };
+      }
+
+      return data;
+
     } catch (error) {
       console.error('Login API error:', error);
-      return { success: false, message: 'Error de conexión' };
+      return { 
+        success: false, 
+        message: 'Error de conexión con el servidor',
+        errors: error
+      };
     }
   }
 
@@ -44,14 +60,29 @@ class AuthAPI {
         body: JSON.stringify(userData),
       });
 
-      return await response.json();
+      const data = await response.json();
+      
+      if (!response.ok) {
+        return {
+          success: false,
+          message: data.message,
+          errors: data.errors || []
+        };
+      }
+
+      return data;
+
     } catch (error) {
       console.error('Register API error:', error);
-      return { success: false, message: 'Error de conexión' };
+      return { 
+        success: false, 
+        message: 'Error de conexión con el servidor',
+        errors: error
+      };
     }
   }
 
-  async verifyToken(token: string): Promise<any> {
+  async verifyToken(token: string): Promise<ApiResponse> {
     try {
       const response = await fetch(`${this.baseURL}/verify`, {
         method: 'GET',
@@ -60,11 +91,14 @@ class AuthAPI {
         },
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        throw new Error('Token verification failed');
+        throw new Error(data.message || 'Token verification failed');
       }
 
-      return await response.json();
+      return data;
+
     } catch (error) {
       console.error('Token verification error:', error);
       throw error;

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from '../../context/AuthContext';
 
 type EmailInputProps = {
     email: string;
@@ -66,33 +67,60 @@ const PasswordInput = ({ password, setPassword, error }: PasswordInputProps) => 
 };
 
 function FormLogin() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+  const { login, isLoading, error, clearError } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [localError, setLocalError] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!email || !password) {
-            setError('Por favor, complete todos los campos');
-            return;
-        }
-        // Aquí iría la lógica de envío del formulario
-        console.log('Formulario enviado:', { email, password });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    clearError();
+    setLocalError('');
+    
+    if (!email || !password) {
+      setLocalError('Por favor, complete todos los campos');
+      return;
     }
+    
+    const success = await login(email, password);
+    
+    // 🔥 Ya no necesitas setLocalError aquí porque el error
+    // vendrá directamente del backend a través del AuthContext
+    // El AuthContext ahora maneja los errores del backend automáticamente
+  }
 
-    return (
-        <form onSubmit={handleSubmit} className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-            <EmailInput email={email} setEmail={setEmail} error={error} />
-            <PasswordInput password={password} setPassword={setPassword} error={error} />
-            
-            <button
-                type="submit"
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
-            >
-                Iniciar sesión
-            </button>
-        </form>
-    );
+  // Mostrar errores del contexto (que ahora incluyen errores del backend)
+  // o errores locales de validación
+  const displayError = error || localError;
+
+  return (
+    <form onSubmit={handleSubmit} className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+      {displayError && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {displayError}
+        </div>
+      )}
+      
+      <EmailInput 
+        email={email} 
+        setEmail={setEmail} 
+        error={localError && !email ? 'Campo requerido' : undefined} 
+      />
+      <PasswordInput 
+        password={password} 
+        setPassword={setPassword} 
+        error={localError && !password ? 'Campo requerido' : undefined} 
+      />
+      
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white font-semibold py-3 px-4 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+      >
+        {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+      </button>
+    </form>
+  );
 }
 
 export default FormLogin;

@@ -1,15 +1,75 @@
 version: '3.8'
 
 services:
-  web-dev:
+  # Frontend application
+  frontend:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ./tienda_front
+      dockerfile: Dockerfile.frontend
     ports:
-      - "5173:5173"
+      - "3000:3000"  # Cambia a 3000 para desarrollo
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=development  # Cambia a development
+      - VITE_API_URL=http://localhost:3001  # Usa el nombre del servicio
     volumes:
-      - .:/tienda_front
-      - /tienda_front/node_modules
-    command: npm run dev
+      - ./tienda_front:/app  # Montar código fuente para hot-reload
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=mercadolibre_db
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - JWT_SECRET=your-jwt-secret-key-here-change-this-in-production
+      - FRONTEND_URL=http://localhost:3000
+    # Eliminado el volumen que monta el código fuente
+    # Solo mantener node_modules para evitar sobrescribir
+    volumes:
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # PostgreSQL database
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=mercadolibre_db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mercadolibre_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge

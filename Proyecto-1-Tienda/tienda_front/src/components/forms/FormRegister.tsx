@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from '../../context/AuthContext';
 
 type EmailInputProps = {
     email: string;
@@ -135,13 +136,13 @@ const PasswordInput = ({ password, setPassword, error, confirm = false }: Passwo
 };
 
 function FormRegister() {
+    const { register, isLoading, error, clearError } = useAuth();
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
     const [cedula, setCedula] = useState('');
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
     const validateForm = () => {
@@ -168,36 +169,38 @@ function FormRegister() {
         return Object.keys(errors).length === 0;
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        clearError();
+        setFieldErrors({}); // 🔥 Cambiado de setLocalErrors a setFieldErrors
         
-        if (validateForm()) {
-            // Aquí iría la lógica de envío del formulario
-            console.log('Formulario de registro enviado:', { 
-                email, 
-                name, 
-                cedula, 
-                phone, 
-                password 
-            });
-            
-            // Limpiar formulario después del envío exitoso
-            setEmail('');
-            setName('');
-            setCedula('');
-            setPhone('');
-            setPassword('');
-            setConfirmPassword('');
-            setError('');
-            setFieldErrors({});
-            
-            alert('Registro exitoso!');
+        // Validación básica frontend
+        const newErrors: { [key: string]: string } = {};
+        
+        if (!name) newErrors.name = 'El nombre es requerido';
+        if (!email) newErrors.email = 'El email es requerido';
+        if (!cedula) newErrors.cedula = 'La cédula es requerida';
+        if (!phone) newErrors.phone = 'El teléfono es requerido';
+        if (!password) newErrors.password = 'La contraseña es requerida';
+        if (password !== confirmPassword) newErrors.confirmPassword = 'Las contraseñas no coinciden';
+        
+        if (Object.keys(newErrors).length > 0) {
+            setFieldErrors(newErrors); // 🔥 Cambiado de setLocalErrors a setFieldErrors
+            return;
         }
-    }
+        
+        await register({ name, email, cedula, phone, password });
+    };
 
     return (
         <form onSubmit={handleSubmit} className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
             <h2 className="text-2xl font-light text-gray-800 mb-6 text-center">Regístrate</h2>
+            
+            {error && (
+                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {error}
+                </div>
+            )}
             
             <NameInput name={name} setName={setName} error={fieldErrors.name} />
             <CedulaInput cedula={cedula} setCedula={setCedula} error={fieldErrors.cedula} />
@@ -213,9 +216,10 @@ function FormRegister() {
             
             <button
                 type="submit"
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 mt-2"
+                disabled={isLoading}
+                className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white font-semibold py-3 px-4 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 mt-2"
             >
-                Registrarse
+                {isLoading ? 'Registrando...' : 'Registrarse'}
             </button>
         </form>
     );
