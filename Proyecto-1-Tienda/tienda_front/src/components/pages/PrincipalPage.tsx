@@ -103,7 +103,7 @@ function PrincipalPage() {
       
       <div className="min-h-screen bg-gray-100">
         {/* Hero Section con Carrusel */}
-        <section className="mb-12">
+        <section className="mb-0">
           <OfferCarousel />
         </section>
         {/* Productos por Categoría Seleccionada */}
@@ -125,7 +125,7 @@ function PrincipalPage() {
         )}
 
         {/* Todos los Productos */}
-        <section className="container mx-auto mb-12 max-w-6xl px-4 py-4">
+        <section className="container mx-auto max-w-6xl -mt-10 relative z-10">
           <ProductGrid products={products} loading={loading} />
         </section>
 

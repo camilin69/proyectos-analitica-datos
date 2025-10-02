@@ -6,18 +6,15 @@ const OfferCarousel: React.FC = () => {
   const [offers, setOffers] = useState<OfferImage[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     const loadOffers = async () => {
       try {
         setLoading(true);
-        
         const offerImages = await offerService.getOfferImages();
         setOffers(offerImages);
-        
         console.log('✅ Ofertas cargadas exitosamente:', offerImages.length);
-        console.log('📸 URLs de las imágenes:', offerImages.map(img => img.url));
-        
       } catch (err) {
         console.error('❌ Error cargando ofertas:', err);
       } finally {
@@ -34,7 +31,7 @@ const OfferCarousel: React.FC = () => {
 
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % offers.length);
-    }, 5000);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, [offers.length]);
@@ -51,107 +48,95 @@ const OfferCarousel: React.FC = () => {
     setCurrentSlide(index);
   };
 
-  const handleImageLoad = (url: string, index: number) => {
-    console.log(`✅ Imagen ${index + 1} cargada correctamente`);
-  };
-
-  const handleImageError = (url: string, index: number) => {
-    console.error(`❌ Error cargando imagen ${index + 1}:`, url);
-  };
-
   if (loading) {
     return (
-      <div className="w-full h-64 bg-gray-200 rounded-lg animate-pulse flex items-center justify-center">
-        <div className="text-gray-500">Cargando ofertas...</div>
+      <div className="w-full h-64 bg-gray-100 animate-pulse rounded-lg">
+        <div className="w-full h-full bg-gray-200 rounded-lg"></div>
       </div>
     );
   }
 
   if (offers.length === 0) {
-    return (
-      <div className="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-        <div className="text-gray-500 text-center">
-          <p>No hay ofertas disponibles</p>
-          <p className="text-sm">Próximamente tendremos grandes descuentos</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="relative w-full max-w-6xl mx-auto rounded-xl overflow-hidden shadow-lg">
+    <div 
+      className="relative w-full overflow-hidden bg-gray-100"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Carousel Container */}
-      <div className="relative h-64 md:h-80 lg:h-96 overflow-hidden">
+      <div className="relative h-64 md:h-72 lg:h-80 xl:h-96 overflow-hidden">
         {offers.map((offer, index) => (
           <div
             key={offer.id}
-            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-              index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+              index === currentSlide ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            {/* Imagen */}
+            {/* Imagen principal */}
             <img
               src={offer.url}
               alt={offer.alt}
-              className="w-full h-full object-cover"
-              onLoad={() => handleImageLoad(offer.url, index)}
-              onError={() => handleImageError(offer.url, index)}
+              className="w-full h-110 object-cover"
+              onError={(e) => {
+                console.error('Error cargando imagen:', offer.url);
+                const jpgUrl = offer.url.replace('.webp', '.jpg');
+                e.currentTarget.src = jpgUrl;
+              }}
             />
             
-            {/* Overlay con información */}
-            <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center">
-              <div className="text-white p-8 max-w-md">
-                <h2 className="text-2xl md:text-3xl font-bold mb-2">
-                  {offer.title}
-                </h2>
-                <p className="text-lg md:text-xl mb-4">
-                  {offer.description}
-                </p>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
-                  Ver Ofertas
-                </button>
-              </div>
-            </div>
+            {/* Gradiente gris que coincide con el fondo de la página */}
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-100 to-transparent pointer-events-none" />
           </div>
         ))}
+
+        {/* Flechas de navegación - Solo visibles en hover */}
+        {offers.length > 1 && (
+          <>
+            {/* Flecha izquierda */}
+            <button
+              onClick={prevSlide}
+              className={`absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-300 z-20 ${
+                isHovered ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            {/* Flecha derecha */}
+            <button
+              onClick={nextSlide}
+              className={`absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-300 z-20 ${
+                isHovered ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </>
+        )}
       </div>
 
-      {/* Navigation Buttons */}
+      {/* Indicadores mínimos */}
       {offers.length > 1 && (
-        <>
-          <button
-            onClick={prevSlide}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 text-gray-800 p-3 rounded-full shadow-lg transition-all z-20"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-
-          <button
-            onClick={nextSlide}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 text-gray-800 p-3 rounded-full shadow-lg transition-all z-20"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-
-          {/* Indicators */}
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
-            {offers.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  index === currentSlide 
-                    ? 'bg-white' 
-                    : 'bg-white bg-opacity-50 hover:bg-opacity-75'
-                }`}
-              />
-            ))}
-          </div>
-        </>
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1.5 z-20">
+          {offers.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                index === currentSlide 
+                  ? 'bg-white shadow-sm' 
+                  : 'bg-white/40 hover:bg-white/60'
+              }`}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

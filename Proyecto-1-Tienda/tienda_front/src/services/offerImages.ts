@@ -18,31 +18,58 @@ class OfferService {
     try {
       console.log('🔄 Iniciando carga de imágenes de ofertas...');
 
-      // URLs EXACTAS de Cloudinary con versiones incluidas
-      const cloudinaryUrls = [
-        'https://res.cloudinary.com/dypeuv53w/image/upload/v1759177162/offer_carousel_1.webp',
-        'https://res.cloudinary.com/dypeuv53w/image/upload/v1759177162/offer_carousel_2.webp',
-        'https://res.cloudinary.com/dypeuv53w/image/upload/v1759177161/offer_carousel_3.webp',
-        'https://res.cloudinary.com/dypeuv53w/image/upload/v1759177161/offer_carousel_4.webp',
-        'https://res.cloudinary.com/dypeuv53w/image/upload/v1759177161/offer_carousel_5.webp',
-        'https://res.cloudinary.com/dypeuv53w/image/upload/v1759177161/offer_carousel_6.webp',
-        'https://res.cloudinary.com/dypeuv53w/image/upload/v1759177161/offer_carousel_7.webp',
-        'https://res.cloudinary.com/dypeuv53w/image/upload/v1759177161/offer_carousel_8.webp'
+      // Probar diferentes formatos
+      const formatVariations = ['.webp', '.jpg', '.png', ''];
+      
+      const cloudinaryBaseUrls = [
+        'offer_carousel_1',
+        'offer_carousel_2', 
+        'offer_carousel_3',
+        'offer_carousel_4',
+        'offer_carousel_5',
+        'offer_carousel_6',
+        'offer_carousel_7',
+        'offer_carousel_8'
       ];
 
-      const images: OfferImage[] = cloudinaryUrls.map((url, index) => {
-        console.log(`✅ URL ${index + 1}:`, url);
-        
-        return {
-          id: `offer_carousel_${index + 1}`,
-          url: url,
-          alt: this.generateAltText(index),
-          title: this.generateTitle(index),
-          description: this.generateDescription(index)
-        };
-      });
+      const images: OfferImage[] = [];
 
-      console.log(`🎉 ${images.length} URLs de Cloudinary procesadas correctamente`);
+      for (let i = 0; i < cloudinaryBaseUrls.length; i++) {
+        const baseName = cloudinaryBaseUrls[i];
+        
+        // Probar diferentes formatos hasta encontrar uno que funcione
+        let workingUrl = '';
+        for (const format of formatVariations) {
+          const testUrl = `https://res.cloudinary.com/${this.cloudName}/image/upload/${baseName}${format}`;
+          
+          try {
+            const exists = await this.checkImageExists(testUrl);
+            if (exists) {
+              workingUrl = testUrl;
+              console.log(`✅ Formato encontrado para ${baseName}: ${format || 'sin extensión'}`);
+              break;
+            }
+          } catch (error) {
+            // Continuar con el siguiente formato
+          }
+        }
+
+        // Si no encontramos un formato que funcione, usar la URL base
+        if (!workingUrl) {
+          workingUrl = `https://res.cloudinary.com/${this.cloudName}/image/upload/${baseName}`;
+          console.warn(`⚠️ Usando URL base para ${baseName}`);
+        }
+
+        images.push({
+          id: baseName,
+          url: workingUrl,
+          alt: this.generateAltText(i),
+          title: this.generateTitle(i),
+          description: this.generateDescription(i)
+        });
+      }
+
+      console.log(`🎉 ${images.length} imágenes procesadas`);
       return images;
 
     } catch (error) {
@@ -50,6 +77,15 @@ class OfferService {
       return [];
     }
   }
+  private async checkImageExists(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
+}
+
 
   /**
    * Genera texto alternativo
