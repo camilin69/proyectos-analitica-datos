@@ -2,7 +2,22 @@
 import React, { useState, useEffect } from 'react';
 import { offerService, OfferImage } from '../../services/offerImages';
 
-const OfferCarousel: React.FC = () => {
+interface OfferCarouselProps {
+  imageNames?: string[]; // Prop opcional con nombres de imágenes
+}
+
+const OfferCarousel: React.FC<OfferCarouselProps> = ({ 
+  imageNames = [
+    'offer_carousel_1',
+    'offer_carousel_2', 
+    'offer_carousel_3',
+    'offer_carousel_4',
+    'offer_carousel_5',
+    'offer_carousel_6',
+    'offer_carousel_7',
+    'offer_carousel_8'
+  ] 
+}) => {
   const [offers, setOffers] = useState<OfferImage[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -12,7 +27,7 @@ const OfferCarousel: React.FC = () => {
     const loadOffers = async () => {
       try {
         setLoading(true);
-        const offerImages = await offerService.getOfferImages();
+        const offerImages = await offerService.getOfferImages(imageNames);
         setOffers(offerImages);
         console.log('✅ Ofertas cargadas exitosamente:', offerImages.length);
       } catch (err) {
@@ -23,18 +38,7 @@ const OfferCarousel: React.FC = () => {
     };
 
     loadOffers();
-  }, []);
-
-  // Auto-advance slides
-  useEffect(() => {
-    if (offers.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % offers.length);
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [offers.length]);
+  }, []); 
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % offers.length);
@@ -78,7 +82,6 @@ const OfferCarousel: React.FC = () => {
             {/* Imagen principal */}
             <img
               src={offer.url}
-              alt={offer.alt}
               className="w-full h-110 object-cover"
               onError={(e) => {
                 console.error('Error cargando imagen:', offer.url);
@@ -124,7 +127,7 @@ const OfferCarousel: React.FC = () => {
 
       {/* Indicadores mínimos */}
       {offers.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1.5 z-20">
+        <div className="absolute bottom-15 left-1/2 transform -translate-x-1/2 flex space-x-1.5 z-20">
           {offers.map((_, index) => (
             <button
               key={index}

@@ -36,7 +36,7 @@ export class UserModel {
   }
 
   static async findById(id: number): Promise<User | null> {
-    const query = 'SELECT id, name, email, cedula, phone, created_at FROM users WHERE id = $1';
+    const query = 'SELECT * FROM users WHERE id = $1';
     const result = await pool.query(query, [id]);
     return result.rows[0] || null;
   }

@@ -17,8 +17,8 @@ function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile>({
     name: user?.name || 'Usuario',
     email: user?.email || '',
-    phone: '+1 234 567 8900',
-    address: 'Av. Principal #123, Ciudad',
+    phone: user?.phone || '',
+    address: user?.address?.street || '',
     avatar: 'https://via.placeholder.com/150'
   });
 

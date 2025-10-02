@@ -2,16 +2,16 @@ import React from 'react';
 import { Product } from '../../types/product';
 import { Link } from 'react-router-dom';
 
-interface ProductCardProps {
+interface ProductHistoryCardProps {
   product: Product;
+  title?: string;
+  category?: string;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  // Calcular precio original si hay descuento
-  const originalPrice = product.discount > 0 
-    ? product.price / (1 - product.discount / 100)
-    : product.price;
-
+const ProductHistoryCard: React.FC<ProductHistoryCardProps> = ({ 
+  product, 
+  title = "Compra tuyo",
+}) => {
   // Usar la primera imagen del array
   const mainImage = product.images && product.images.length > 0 
     ? product.images[0] 
@@ -30,21 +30,26 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <Link 
       to={`/product/${product.id}`}
-      className="bg-white w-[183px] h-[380px] overflow-hidden group flex flex-col"
+      className="bg-white w-[183px] h-[300px] overflow-hidden group flex flex-col border border-gray-200 rounded-[5px]"
     >
-      {/* Imagen - Parte superior */}
-      <div className="relative flex-shrink-0">
+      {/* Header con título */}
+      <div className="bg-gray-50 p-4 ">
+        <p className="text-[16px] font-bold text-gray-700 truncate">{title}</p>
+      </div>
+
+      {/* Imagen - Más pequeña */}
+      <div className="relative flex-shrink-0 px-2">
         <img 
           src={mainImage} 
           alt={product.name}
-          className="w-full h-48 object-cover p-2"
+          className="w-full object-contain"
         />
       </div>
       
-      {/* Contenido de texto - Parte inferior con altura fija */}
-      <div className="flex-1 py-6 px-2 flex flex-col">
+      {/* Contenido de texto */}
+      <div className="flex-1 py-6 px-2 flex flex-col min-h-0">
         {/* Nombre con altura fija de 2 líneas */}
-        <div className="mb-2 min-h-[48px] flex items-start">
+        <div className="mb-1 min-h-[40px] flex items-start">
           <p className="text-[14px] group-hover:text-blue-600 transition-colors duration-200 overflow-hidden"
             style={{
               display: '-webkit-box',
@@ -57,29 +62,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </p>
         </div>
 
-        <div className="mt-auto space-y-1">
-          {product.discount > 0 && (
-            <div>
-              <span className="text-xs text-gray-500 line-through">
-                {formatPrice(originalPrice)}
-              </span>
-            </div>
-          )}
-          
-          <div className="flex items-center justify-between">
-            <span className="text-[24px] font-semi-bold text-black">
-              {formatPrice(product.price)}
-            </span>
-          </div>
-          {product.discount > 0 && (
-              <span className="text-xs text-green-800 bg-green-100 px-1.5 py-0.5 rounded">
+        {/* Solo precio actual */}
+        <div className="mt-auto">
+          <span className="text-[18px] font-semi-bold text-black">
+            {formatPrice(product.price)}
+          </span>
+        </div>
+        {product.discount > 0 && (
+              <span className="text-xs text-green-500 ">
                 {product.discount}% OFF
               </span>
             )}
-        </div>
       </div>
     </Link>
   );
 };
 
-export default ProductCard;
+export default ProductHistoryCard;

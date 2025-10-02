@@ -4,9 +4,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useProducts } from '../../context/ProductContext';
 import TopBar from '../home/TopBar';
 import OfferCarousel from '../home/OfferCarousel';
-import ProductGrid from '../products/ProductGrid';
 import LoadingSpinner from '../products/LoadingSpinner';
 import { Link } from 'react-router-dom';
+import ProductsCarousel from '../products/ProductsSuggestedCarousel';
+import ProductsHistoryCarousel from '../products/ProductsHistoryCarousel';
+import ProductsSuggestedCarousel from '../products/ProductsSuggestedCarousel';
 
 function PrincipalPage() {
   const { user, logout } = useAuth();
@@ -106,27 +108,13 @@ function PrincipalPage() {
         <section className="mb-0">
           <OfferCarousel />
         </section>
-        {/* Productos por Categoría Seleccionada */}
-        {selectedCategory && categoryProducts.length > 0 && (
-          <section className="container mx-auto mb-12 max-w-6xl px-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold text-gray-900">
-                {categories.find(c => c.id === selectedCategory)?.name}
-              </h2>
-              <Link 
-                to={`/category/${selectedCategory}`}
-                className="text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Ver todos →
-              </Link>
-            </div>
-            <ProductGrid products={categoryProducts.slice(0, 8)} />
-          </section>
-        )}
 
-        {/* Todos los Productos */}
         <section className="container mx-auto max-w-6xl -mt-10 relative z-10">
-          <ProductGrid products={products} loading={loading} />
+          <ProductsHistoryCarousel products={products} loading={loading} />
+        </section>
+
+        <section className="container mx-auto mt-[50px] max-w-6xl relative z-10">
+          <ProductsSuggestedCarousel products={products} loading={loading} />
         </section>
 
         {/* Footer Simple */}

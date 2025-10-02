@@ -1,34 +1,66 @@
 import logo from '../../assets/logo.png';
-import flag from '../../assets/Flag_of_Colombia.svg';
-import { FaMapMarkerAlt, FaChevronDown, FaHeart } from 'react-icons/fa';
+import meli from '../../assets/meli.webp';
+import { FaHeart } from 'react-icons/fa';
+import { VscChevronDown } from "react-icons/vsc";
+import { PiShoppingCartThin } from "react-icons/pi";
+import { GoBell } from 'react-icons/go';
+import { CiLocationOn } from "react-icons/ci";
+import { IoSearchOutline } from "react-icons/io5";
 import { Link } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
+import { User, Address } from '../../types/user';
 
-function TopBar({ user, onLogout }) {
-  const [showCategories, setShowCategories] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
-  const [showFavorites, setShowFavorites] = useState(false);
-  
-  const [categoriesArrowPosition, setCategoriesArrowPosition] = useState(16);
-  const [profileArrowPosition, setProfileArrowPosition] = useState(16);
-  const [favoritesArrowPosition, setFavoritesArrowPosition] = useState(16);
-  
-  const categoriesRef = useRef(null);
-  const categoriesButtonRef = useRef(null);
-  
-  const profileRef = useRef(null);
-  const profileButtonRef = useRef(null);
-  
-  const favoritesRef = useRef(null);
-  const favoritesButtonRef = useRef(null);
+interface TopBarProps {
+  user: User | null;
+  onLogout: () => void;
+}
 
-  const getFirstName = (fullName) => {
+interface CategoryItem {
+  name: string;
+  href: string;
+}
+
+interface ProfileOption {
+  name: string;
+  href?: string;
+  action?: () => void;
+  isLogout?: boolean;
+  isHeader?: boolean;
+  isSeparator?: boolean;
+}
+
+interface FavoriteProduct {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+}
+
+function TopBar({ user, onLogout }: TopBarProps) {
+  const [showCategories, setShowCategories] = useState<boolean>(false);
+  const [showProfile, setShowProfile] = useState<boolean>(false);
+  const [showFavorites, setShowFavorites] = useState<boolean>(false);
+  
+  const [categoriesArrowPosition, setCategoriesArrowPosition] = useState<number>(16);
+  const [profileArrowPosition, setProfileArrowPosition] = useState<number>(16);
+  const [favoritesArrowPosition, setFavoritesArrowPosition] = useState<number>(16);
+  
+  const categoriesRef = useRef<HTMLDivElement>(null);
+  const categoriesButtonRef = useRef<HTMLDivElement>(null);
+  
+  const profileRef = useRef<HTMLDivElement>(null);
+  const profileButtonRef = useRef<HTMLDivElement>(null);
+  
+  const favoritesRef = useRef<HTMLDivElement>(null);
+  const favoritesButtonRef = useRef<HTMLDivElement>(null);
+
+  const getFirstName = (fullName: string | undefined): string => {
     if (!fullName) return 'Usuario';
     return fullName.split(' ')[0];
   };
 
   // Datos para el menú de categorías
-  const categories = [
+  const categories: CategoryItem[] = [
     { name: 'Electrónicos', href: '/category/electronics' },
     { name: 'Ropa y Accesorios', href: '/category/clothing' },
     { name: 'Hogar', href: '/category/home' },
@@ -40,31 +72,62 @@ function TopBar({ user, onLogout }) {
   ];
 
   // Datos para el menú de perfil
-  const profileOptions = [
-    { name: 'Mi perfil', href: '/profile' },
+  // Datos para el menú de perfil
+  const profileOptions: ProfileOption[] = [
+    // Header con avatar y nombre
+    { 
+      name: 'header', 
+      href: '/profile',
+      isHeader: true 
+    },
+    // Separador
+    { name: 'separator-1' },
+    // Opciones principales
     { name: 'Compras', href: '/purchases' },
+    { name: 'Ventas', href: '/sales' },
+    { name: 'Publicaciones', href: '/publications' },
+    // Separador
+    { name: 'separator-2' },
+    // Más opciones
     { name: 'Historial', href: '/history' },
     { name: 'Preguntas', href: '/questions' },
     { name: 'Opiniones', href: '/reviews' },
     { name: 'Suscripciones', href: '/subscriptions' },
+    // Separador
+    { name: 'separator-3' },
+    // Opciones administrativas
     { name: 'Resumen', href: '/summary' },
-    { name: 'Publicaciones', href: '/publications' },
-    { name: 'Ventas', href: '/sales' },
     { name: 'Postventa', href: '/aftersale' },
     { name: 'Reputación', href: '/reputation' },
     { name: 'Publicidad', href: '/advertising' },
     { name: 'Mi página', href: '/mypage' },
     { name: 'Métricas', href: '/metrics' },
     { name: 'Facturación', href: '/billing' },
+    // Separador final
+    { name: 'separator-4' },
     { name: 'Salir', action: onLogout, isLogout: true }
   ];
 
   // Datos para el menú de favoritos (simulado)
-  const favoriteProducts = [
+  const favoriteProducts: FavoriteProduct[] = [
     { id: '1', name: 'iPhone 15 Pro', price: 999.99, image: 'https://via.placeholder.com/40/3B82F6/FFFFFF?text=IP' },
     { id: '2', name: 'Laptop Gaming', price: 1299.99, image: 'https://via.placeholder.com/40/EF4444/FFFFFF?text=LP' },
     { id: '3', name: 'Audífonos Bluetooth', price: 199.99, image: 'https://via.placeholder.com/40/10B981/FFFFFF?text=AU' }
   ];
+
+  const formatAddress = (address: Address | string | undefined): string => {
+    if (!address) return 'Agregar dirección1';
+    
+    // Si la dirección es un string, retornarla directamente
+    if (typeof address === 'string') return address;
+    
+    // Si es un objeto Address, formatearlo
+    const { street, city } = address;
+    if (street && city) {
+      return `${street}, ${city}`;
+    }
+    return 'Agregar dirección';
+  };
 
   // Calcular posición de todos los dropdowns
   useEffect(() => {
@@ -125,19 +188,19 @@ function TopBar({ user, onLogout }) {
           <div className="col-span-6 flex justify-center">
             <div className="relative w-full max-w-2xl">
               <input
-                type="text"
-                placeholder="Buscar productos, marcas y más..."
-                className="w-full p-2 pl-2 rounded-l bg-white border border-gray-300 focus:outline-none focus:border-blue-500"
+                  type="text"
+                  placeholder="Buscar productos, marcas y más..."
+                  className="w-full p-2 pl-4 bg-white border rounded-[2px] border-gray-300 focus:outline-none focus:border-blue-500 shadow-sm"
               />
-              <button className="absolute right-0 top-0 h-full bg-gray-100 hover:bg-gray-200 px-4 rounded-r border border-l-0 border-gray-300">
-                🔍
+              <button className="absolute right-0 top-1/2 transform -translate-y-1/2 h-3/4 border-l border-l-gray-300 px-4 cursor-pointer">
+                <IoSearchOutline className='text-[23px] text-gray-500' />
               </button>
             </div>
           </div>
           
           <div className="col-span-4 flex justify-end">
-            <a href="#" className="flex items-center text-sm hover:text-gray-500 transition duration-200">
-              <img src={flag} alt="Colombia" className="w-80 h-[34px]" />
+            <a className="flex items-center text-sm hover:text-gray-500 transition duration-200">
+              <img src={meli} alt="Colombia" className="w-80 h-full" />
             </a>
           </div>
         </div>
@@ -145,15 +208,15 @@ function TopBar({ user, onLogout }) {
         {/* Segunda fila */}
         <div className="grid grid-cols-12 gap-4 items-center py-2">
           <div className="col-span-2 flex">
-            <a href="#" className="flex items-start hover:text-gray-500 transition duration-200 w-full">
+            <a className="flex items-start hover:text-gray-500 transition duration-200 w-full">
               <div className="flex-shrink-0 mr-2 mt-0.5">
-                <FaMapMarkerAlt className="text-gray-600 text-sm" />
+                <CiLocationOn className="text-black text-[27px]" />
               </div>
               
-              <div className="flex flex-col">
-                <span className="text-xs leading-tight">Enviar a {getFirstName(user?.name)}</span>
-                <span className="text-sm font-semibold leading-tight">
-                  {user?.address ? user.address : 'Agregar dirección'}
+              <div className="flex flex-col whitespace-nowrap overflow-hidden">
+                <span className="text-xs leading-tight text-gray-600">Enviar a {getFirstName(user?.name)}</span>
+                <span className="flex-shrink-0 text-sm leading-tight truncate min-w-0">
+                  {formatAddress(user?.address)}
                 </span>
               </div>
             </a>
@@ -170,28 +233,28 @@ function TopBar({ user, onLogout }) {
             >
               <button className="flex items-center space-x-1 text-sm hover:text-gray-700 transition duration-200 py-1 h-8 bg-yellow-500 border-yellow-500 rounded hover:bg-yellow-400 whitespace-nowrap">
                 <span>Categorías</span>
-                <FaChevronDown className={`text-xs transition-transform duration-200 ${showCategories ? 'rotate-180' : ''}`} />
+                <VscChevronDown  className={`text-xs transition-transform duration-200 ${showCategories ? 'rotate-180' : ''}`} />
               </button>
             </div>
             
             {/* Enlaces de navegación - SIN SCROLL HORIZONTAL */}
             <div className="flex items-center flex-1 min-w-0 overflow-hidden">
-              <a href="#" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
+              <a href="/offers" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
                 Ofertas
               </a>
-              <a href="#" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
+              <a href="/coupons" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
                 Cupones
               </a>
-              <a href="#" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
+              <a href="/supermarket" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
                 Supermercado
               </a>
-              <a href="#" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
+              <a href="/fashion" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
                 Moda
               </a>
               <Link to="/sell" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
                 Vender
               </Link>
-              <a href="#" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
+              <a href="/help" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
                 Ayuda / PQR
               </a>
             </div>
@@ -207,18 +270,33 @@ function TopBar({ user, onLogout }) {
                 onMouseEnter={() => setShowProfile(true)}
                 onMouseLeave={() => setShowProfile(false)}
               >
-                <button className="flex items-center text-sm hover:text-gray-700 transition duration- py-1 h-8 bg-yellow-500 border-yellow-500 rounded hover:bg-yellow-400">
-                  <span className='px-1'>Mi perfil</span>
-                  <FaChevronDown className={`text-xs transition-transform duration-200 ${showProfile ? 'rotate-180' : ''}`} />
+                <button className="cursor-pointer flex items-center space-x-[2px] text-sm hover:text-gray-700 transition duration-200 py-1 h-8 bg-yellow-500 border-yellow-500 rounded pl-1 pr-2 min-w-0 max-w-[120px]">
+                  {/* Avatar circular */}
+                  <div className="w-6 h-6 rounded-full bg-gray-300 overflow-hidden border border-gray-400 flex-shrink-0">
+                    {user?.avatar_url ? (
+                      <img 
+                        src={user.avatar_url} 
+                        alt="Avatar" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-400 flex items-center justify-center text-xs text-white">
+                        {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <span className='truncate min-w-0 flex-1'>{getFirstName(user?.name)}</span>
+                  <VscChevronDown className={`text-xs transition-transform duration-200 flex-shrink-0 ${showProfile ? 'rotate-180' : ''}`} />
                 </button>
               </div>
             </div>
             
-            <a href="#" className="text-sm hover:text-gray-700 transition duration-200 whitespace-nowrap px-2 py-1 h-8 flex items-center flex-shrink-0">
+            <a href="" className="text-sm hover:text-gray-700 transition duration-200 whitespace-nowrap py-1 h-8 flex items-center flex-shrink-0">
               Mis compras
             </a>
             
-            <div className="flex items-center flex-shrink-0">
+            <div className="flex items-center flex-shrink-0 space-x-4">
               {/* Menú desplegable de Favoritos */}
               <div className="relative flex-shrink-0">
                 <div 
@@ -228,17 +306,17 @@ function TopBar({ user, onLogout }) {
                   onMouseLeave={() => setShowFavorites(false)}
                 >
                   <button className="flex items-center text-sm hover:text-gray-700 transition duration-200 py-1 h-8 bg-yellow-500 border-yellow-500 rounded hover:bg-yellow-400 whitespace-nowrap">
-                    <span className='px-1'>Favoritos</span>
-                    <FaChevronDown className={`text-xs transition-transform duration-200 ${showFavorites ? 'rotate-180' : ''}`} />
+                    <span className='px-[2px]'>Favoritos</span>
+                    <VscChevronDown  className={`text-xs transition-transform duration-200 ${showFavorites ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
               </div>
               
-              <a href="#" className="p-1 hover:bg-yellow-400 rounded transition duration-200 h-8 w-8 flex items-center justify-center">
-                🔔
+              <a className="cursor-pointer rounded transition duration-200 flex items-center justify-center">
+                <GoBell className="text-black-500 text-[22px] hover:text-black-100" />
               </a>
-              <a href="#" className="p-1 hover:bg-yellow-400 rounded transition duration-200 h-8 w-8 flex items-center justify-center">
-                🛒
+              <a className="cursor-pointer rounded transition duration-200 flex items-center justify-center">
+                <PiShoppingCartThin  className="text-black-500 text-[22px] hover:text-black-100" />
               </a>
             </div>
           </nav>
@@ -280,7 +358,7 @@ function TopBar({ user, onLogout }) {
       {showProfile && (
         <div 
           ref={profileRef}
-          className="fixed z-50 bg-white rounded-md shadow-lg border border-gray-200 w-56"
+          className="fixed z-50 bg-white rounded-md shadow-lg border border-gray-200 w-64"
           onMouseEnter={() => setShowProfile(true)}
           onMouseLeave={() => setShowProfile(false)}
         >
@@ -292,34 +370,82 @@ function TopBar({ user, onLogout }) {
             }}
           ></div>
           
-          <div className="relative bg-white rounded-md py-1 max-h-80 overflow-y-auto">
-            {profileOptions.map((option, index) => (
-              option.action ? (
-                <button
-                  key={index}
-                  onClick={() => {
-                    option.action();
-                    setShowProfile(false);
-                  }}
-                  className={`block w-full text-left px-4 py-2 text-sm transition duration-150 ${
-                    option.isLogout 
-                      ? 'text-red-600 hover:bg-red-50 border-t border-gray-100 mt-1' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  {option.name}
-                </button>
-              ) : (
+          <div className="relative bg-white rounded-md">
+            {profileOptions.map((option, index) => {
+              // Header con avatar y nombre
+              if (option.isHeader) {
+                return (
+                  <Link
+                    key="profile-header"
+                    to="/profile"
+                    className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 transition duration-150 border-b border-gray-100"
+                    onClick={() => setShowProfile(false)}
+                  >
+                    <div className="w-10 h-10 rounded-full bg-gray-300 overflow-hidden border border-gray-400 flex-shrink-0">
+                      {user?.avatar_url ? (
+                        <img 
+                          src={user.avatar_url} 
+                          alt="Avatar" 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-400 flex items-center justify-center text-sm font-semibold text-white">
+                          {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-lg font-semibold text-gray-900 truncate">
+                        {getFirstName(user?.name)}
+                      </p>
+                      <div className="flex items-center space-x-1">
+                        <p className="text-sm text-gray-500 truncate">Mi perfil</p>
+                        <VscChevronDown className="text-sm text-gray-500 flex-shrink-0 rotate-270" />
+                      </div>
+                    </div>
+                  </Link>
+                );
+              }
+              
+              // Separador
+              if (option.name.startsWith('separator')) {
+                return (
+                  <div key={option.name} className="border-t border-gray-200"></div>
+                );
+              }
+              
+              // Opción de logout
+              if (option.action) {
+                return (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      option.action!();
+                      setShowProfile(false);
+                    }}
+                    className={`block w-full text-left px-4 py-2 text-sm transition duration-150 ${
+                      option.isLogout 
+                        ? 'text-red-600 hover:bg-red-50' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {option.name}
+                  </button>
+                );
+              }
+              
+              // Opción normal
+              return (
                 <Link
                   key={index}
-                  to={option.href}
+                  to={option.href!}
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-150"
                   onClick={() => setShowProfile(false)}
                 >
                   {option.name}
                 </Link>
-              )
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

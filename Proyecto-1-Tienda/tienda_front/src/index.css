@@ -1,9 +1,36 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Proxima Nova';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('https://http2.mlstatic.com/ui/webfonts/v3.0.0/proxima-nova/proximanova-light.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Proxima Nova';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://http2.mlstatic.com/ui/webfonts/v3.0.0/proxima-nova/proximanova-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Proxima Nova';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('https://http2.mlstatic.com/ui/webfonts/v3.0.0/proxima-nova/proximanova-semibold.woff2') format('woff2');
+}
+
 @theme {
-  --color-yellow-500: #ffe600; /* Define your custom yellow */
-  --color-yellow-400: #fff033; /* Optional: a lighter shade */
-  --color-yellow-600: #e6cc00; /* Optional: a darker shade */
+  --color-yellow-500: #ffe600;
+  --color-yellow-400: #fff033;
+  --color-yellow-600: #e6cc00;
+  
+  /* Opcional: definir la fuente como default */
+  --font-family-sans: 'Proxima Nova', system-ui, sans-serif;
 }
 
 @layer base {
@@ -11,6 +38,10 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Proxima Nova', system-ui, sans-serif;
   }
 
   a {
@@ -22,10 +53,10 @@
     background: none;
     border: none;
     font: inherit;
+    font-family: inherit;
   }
 
   ul, ol {
     list-style: none;
   }
-  
 }
