@@ -1,5 +1,5 @@
 // services/authentication.ts (actualizado)
-import { type RegisterData } from '../context/AuthContext';
+import { type RegisterData } from '../types/user';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 

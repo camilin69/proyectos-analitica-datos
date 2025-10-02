@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@theme {
+  --color-yellow-500: #ffe600; /* Define your custom yellow */
+  --color-yellow-400: #fff033; /* Optional: a lighter shade */
+  --color-yellow-600: #e6cc00; /* Optional: a darker shade */
+}
+
 @layer base {
   * {
     margin: 0;
@@ -21,4 +27,5 @@
   ul, ol {
     list-style: none;
   }
+  
 }

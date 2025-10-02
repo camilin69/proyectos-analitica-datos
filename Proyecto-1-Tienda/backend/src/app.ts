@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
+import productRoutes from './routes/productRoutes'; // ✅ Nueva ruta
 
 dotenv.config();
 
@@ -12,19 +13,17 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(helmet());
-
-// 🔥 CONFIGURACIÓN CORRECTA DE CORS (usa solo una)
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173'], // ✅ Ambos puertos
+  origin: ['http://localhost:3000', 'http://localhost:5173'],
   credentials: true
 }));
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes); // ✅ Nueva ruta
 
 // Health check
 app.get('/api/health', (req, res) => {

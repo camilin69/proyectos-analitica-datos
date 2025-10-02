@@ -56,9 +56,11 @@ services:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
       - POSTGRES_HOST_AUTH_METHOD=trust
+      - PG_DATA:/var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./inserts.sql:/docker-entrypoint-initdb.d/02-inserts.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user -d mercadolibre_db"]
       interval: 10s
