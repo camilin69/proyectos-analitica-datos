@@ -61,14 +61,14 @@ function TopBar({ user, onLogout }: TopBarProps) {
 
   // Datos para el menú de categorías
   const categories: CategoryItem[] = [
-    { name: 'Electrónicos', href: '/category/electronics' },
-    { name: 'Ropa y Accesorios', href: '/category/clothing' },
-    { name: 'Hogar', href: '/category/home' },
-    { name: 'Deportes', href: '/category/sports' },
-    { name: 'Libros', href: '/category/books' },
-    { name: 'Belleza', href: '/category/beauty' },
-    { name: 'Juguetes', href: '/category/toys' },
-    { name: 'Automotriz', href: '/category/automotive' }
+    { name: 'Supermercado', href: '/category/supermarket' },
+    { name: 'Tecnología', href: '/category/tech' },
+    { name: 'Farmacia', href: '/category/pharmacy' },
+    { name: 'Electrodomesticos', href: '/category/electronics' },
+    { name: 'Hogar y Fitness', href: '/category/home' },
+    { name: 'Belleza y Cuidado Personal', href: '/category/beauty' },
+    { name: 'Juegos y Juguetes', href: '/category/toys' },
+    { name: 'Accesorios para Vehiculos', href: '/category/automotive' }
   ];
 
   // Datos para el menú de perfil

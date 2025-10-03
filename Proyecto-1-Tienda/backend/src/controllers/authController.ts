@@ -125,6 +125,35 @@ export const authController = {
     }
   },
 
+  async getUserById(req: Request, res: Response) {
+    try {
+      const userId = parseInt(req.params.id, 10);
+      if (isNaN(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: 'ID de usuario inválido'
+        });
+      }
+      const user = await UserModel.findById(userId);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'Usuario no encontrado'
+        });
+      } 
+      res.json({
+        success: true,
+        user
+      });
+    } catch (error) {
+      console.error('Error al obtener usuario por ID:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  },
+
   async verifyToken(req: Request, res: Response) {
     try {
       // El middleware de autenticación ya verificó el token

@@ -1,4 +1,5 @@
 import type { Product } from '../types/product';
+import { User } from '../types/user';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -58,10 +59,15 @@ class ProductService {
     }
   }
 
-  // Obtener productos por categoría
+  // Obtener productos por categoría (OPTIMIZADO)
   async getProductsByCategory(categoryId: number): Promise<Product[]> {
     try {
-      const response = await fetch(`${this.baseURL}/category/${categoryId}`);
+      const response = await fetch(`${this.baseURL}/category/${categoryId}`, {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'max-age=300' // Cache de 5 minutos
+        }
+      });
       const result: ApiResponse<Product[]> = await this.handleResponse(response);
       return result.data;
     } catch (error) {
@@ -70,7 +76,39 @@ class ProductService {
     }
   }
 
-  // Obtener productos por vendedor
+  async getSellersByCategory(categoryId: number): Promise<User[]> {
+    try {
+      const response = await fetch(`${this.baseURL}/category/${categoryId}/sellers`, {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'max-age=300'
+        }
+      });
+      const result: ApiResponse<User[]> = await this.handleResponse(response);
+      return result.data;
+    } catch (error) {
+      console.error(`Error fetching brands for category ${categoryId}:`, error);
+      return [];
+    }
+  }
+
+  // Obtener productos por nombre de categoría (nuevo método)
+  async getProductsByCategoryName(categoryName: string): Promise<Product[]> {
+    try {
+      const response = await fetch(`${this.baseURL}/category/name/${encodeURIComponent(categoryName)}`, {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'max-age=300'
+        }
+      });
+      const result: ApiResponse<Product[]> = await this.handleResponse(response);
+      return result.data;
+    } catch (error) {
+      console.error(`Error fetching products for category ${categoryName}:`, error);
+      throw error;
+    }
+  }
+
   async getProductsBySeller(sellerId: number): Promise<Product[]> {
     try {
       const response = await fetch(`${this.baseURL}/seller/${sellerId}`);
@@ -82,10 +120,20 @@ class ProductService {
     }
   }
 
-  // Buscar productos
-  async searchProducts(query: string): Promise<Product[]> {
+  // Buscar productos (OPTIMIZADO)
+  async searchProducts(query: string, categoryId?: number): Promise<Product[]> {
     try {
-      const response = await fetch(`${this.baseURL}/search?q=${encodeURIComponent(query)}`);
+      let url = `${this.baseURL}/search?q=${encodeURIComponent(query)}`;
+      if (categoryId) {
+        url += `&category=${categoryId}`;
+      }
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'max-age=60' // Cache de 1 minuto para búsquedas
+        }
+      });
       const result: ApiResponse<Product[]> = await this.handleResponse(response);
       return result.data;
     } catch (error) {

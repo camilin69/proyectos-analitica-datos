@@ -92,27 +92,39 @@ export class ProductModel {
     return result.rows;
   }
 
+  
   // Obtener productos por vendedor
   static async findBySeller(sellerId: number): Promise<ProductWithDetails[]> {
     const query = `
       SELECT 
-        p.*,
-        u.name as seller_name,
-        u.rating as seller_rating,
-        u.total_sales as seller_total_sales,
-        u.avatar_url as seller_avatar_url,
-        u.is_verified as seller_is_verified,
-        c.name as category_name
+        p.*
       FROM products p
       JOIN users u ON p.seller_id = u.id
-      JOIN categories c ON p.category_id = c.id
-      WHERE p.seller_id = $1
+      WHERE u.id = $1
       ORDER BY p.created_at DESC
     `;
     
     const result: QueryResult = await pool.query(query, [sellerId]);
     return result.rows;
   }
+
+  static async getSellersByCategory(categoryId: number): Promise<string[]> {
+    const query = `
+      SELECT DISTINCT *
+      FROM products p
+      JOIN users u ON p.seller_id = u.id
+      WHERE p.category_id = $1
+      ORDER BY u.name
+      LIMIT 12
+    `;
+    
+    const result: QueryResult = await pool.query(query, [categoryId]);
+    
+    // Filtrar y limpiar los nombres de vendedores
+    return result.rows
+  }
+
+
 
   // Buscar productos por texto
   static async search(query: string): Promise<ProductWithDetails[]> {

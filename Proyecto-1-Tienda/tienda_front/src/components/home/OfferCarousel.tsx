@@ -29,9 +29,8 @@ const OfferCarousel: React.FC<OfferCarouselProps> = ({
         setLoading(true);
         const offerImages = await offerService.getOfferImages(imageNames);
         setOffers(offerImages);
-        console.log('✅ Ofertas cargadas exitosamente:', offerImages.length);
       } catch (err) {
-        console.error('❌ Error cargando ofertas:', err);
+        console.error('Error loading offer images:', err);
       } finally {
         setLoading(false);
       }

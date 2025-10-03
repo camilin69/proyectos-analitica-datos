@@ -7,6 +7,7 @@ export interface AuthContextType {
     register: (userData: RegisterData) => Promise<boolean>;
     logout: () => void;
     isLoading: boolean;
+    findUserById: (id: number) => Promise<User | null>;
     error: string | null; 
     clearError: () => void; 
 }

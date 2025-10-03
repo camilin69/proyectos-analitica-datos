@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import type { Product, ProductContextType } from '../types/product';
 import { productService } from '../services/products';
+import { User } from '../types/user';
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
@@ -82,7 +83,24 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
     }
   };
 
-  // Cargar productos al inicializar
+  const getSellersByCategory = async (categoryId: number): Promise<User[]> => {
+    try {
+      return await productService.getSellersByCategory(categoryId);
+    } catch (error) {
+      console.error(`Error fetching sellers for category ${categoryId}:`, error);
+      return [];
+    }
+  };
+
+  const getProductsByUserId = async (sellerId: number): Promise<Product[]> => {
+    try {
+      return await productService.getProductsBySeller(sellerId);
+    } catch (error) {
+      console.error(`Error fetching products for seller ${sellerId}:`, error);
+      return [];
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -94,11 +112,12 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
     fetchProducts,
     getProductsByCategory,
     searchProducts,
-    // Nuevas funciones añadidas
     getProductById,
     getFeaturedProducts,
     searchProductsOnline,
-    getProductsByCategoryOnline
+    getProductsByCategoryOnline,
+    getSellersByCategory,
+    getProductsByUserId
   };
 
   return (

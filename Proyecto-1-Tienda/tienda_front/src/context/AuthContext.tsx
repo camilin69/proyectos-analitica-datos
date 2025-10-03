@@ -111,6 +111,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const findUserById = async (userId: number): Promise<User | null> => {
+    try {
+      const response = await authAPI.getUserById(userId, token || '');  
+
+      if (response.success && response.user) {
+        return response.user;
+      }else {
+        setError(response.message || 'Error fetching user');
+        return null;
+      }
+    } catch (error) {
+      console.error('Fetch user error:', error);
+      return null;
+    }
+  };
+
 
   const logout = () => {
     setUser(null);
@@ -130,6 +146,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     logout,
     isLoading,
+    findUserById,
     error,
     clearError
   };

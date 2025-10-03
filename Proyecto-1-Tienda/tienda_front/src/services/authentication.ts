@@ -82,6 +82,33 @@ class AuthAPI {
     }
   }
 
+  async getUserById(userId: number, token: string): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseURL}/user/${userId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      }); 
+      const data = await response.json();
+      if (!response.ok) {
+        return {
+          success: false,
+          message: data.message,
+          errors: data.errors || []
+        };
+      } 
+      return data;
+    } catch (error) {
+      console.error('Get user by ID error:', error);
+      return { 
+        success: false, 
+        message: 'Error de conexión con el servidor',
+        errors: error
+      };
+    }
+  }
+
   async verifyToken(token: string): Promise<ApiResponse> {
     try {
       const response = await fetch(`${this.baseURL}/verify`, {

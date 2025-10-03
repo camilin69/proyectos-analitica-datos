@@ -13,7 +13,6 @@ class OfferService {
    */
   async getOfferImages(imageNames: string[]): Promise<OfferImage[]> {
     try {
-      console.log('🔄 Iniciando carga de imágenes de ofertas...', imageNames);
 
       // Probar diferentes formatos
       const formatVariations = ['.webp', '.jpg', '.png', ''];
@@ -32,7 +31,6 @@ class OfferService {
             const exists = await this.checkImageExists(testUrl);
             if (exists) {
               workingUrl = testUrl;
-              console.log(`✅ Formato encontrado para ${baseName}: ${format || 'sin extensión'}`);
               break;
             }
           } catch (error) {
@@ -52,11 +50,9 @@ class OfferService {
         });
       }
 
-      console.log(`🎉 ${images.length} imágenes procesadas`);
       return images;
 
     } catch (error) {
-      console.error('❌ Error cargando imágenes de ofertas:', error);
       return [];
     }
   }

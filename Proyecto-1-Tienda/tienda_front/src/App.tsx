@@ -8,6 +8,8 @@ import SellPage from './components/pages/SellPage';
 import ProfilePage from './components/pages/ProfilePage';
 import ProductDetailPage from './components/pages/ProductDetail';
 import LoadingSpinner from './components/products/LoadingSpinner';
+import CategoryPage from './components/pages/CategoryPage';
+import ProfileSeller from './components/pages/ProfileSeller';
 
 // Componente para proteger rutas
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -78,12 +80,16 @@ function App() {
                 </ProtectedRoute>
               } />
 
-              <Route path="/category/:id" element={
+              <Route path="/category/:categoryName" element={
                 <ProtectedRoute>
-                  <ProductDetailPage />
+                  <CategoryPage />
                 </ProtectedRoute>
               } />
-              
+              <Route path="/profile/:sellerId" element={
+                <ProtectedRoute>
+                  <ProfileSeller />
+                </ProtectedRoute>
+              } />
               {/* Ruta 404 */}
               <Route path="*" element={<div>Página no encontrada</div>} />
             </Routes>

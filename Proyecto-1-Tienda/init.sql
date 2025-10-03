@@ -111,14 +111,69 @@ CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_product_id ON order_items(product_id);
 
--- Insertar categorías por defecto
-INSERT INTO categories (name, description) VALUES 
-('electronics', 'Productos electrónicos y tecnología'),
-('clothing', 'Ropa y accesorios'),
-('home', 'Artículos para el hogar'),
-('sports', 'Deportes y actividades al aire libre'),
-('books', 'Libros y material educativo'),
-('beauty', 'Belleza y cuidado personal'),
-('toys', 'Juguetes y juegos'),
-('automotive', 'Repuestos y accesorios para vehículos')
-ON CONFLICT (name) DO NOTHING;
+CREATE INDEX IF NOT EXISTS idx_products_category_id_price ON products(category_id, price);
+CREATE INDEX IF NOT EXISTS idx_products_category_id_created_at ON products(category_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_products_category_id_discount ON products(category_id, discount DESC);
+
+-- Índice para búsqueda por nombre de categoría
+CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name);
+
+-- Función para búsqueda optimizada por categoría
+CREATE OR REPLACE FUNCTION get_products_by_category_name(category_name_param VARCHAR)
+RETURNS TABLE (
+    id INT,
+    name VARCHAR,
+    price DECIMAL,
+    discount DECIMAL,
+    seller_id INT,
+    stock INT,
+    images JSONB,
+    condition VARCHAR,
+    tags JSONB,
+    description TEXT,
+    category_id INT,
+    features JSONB,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    seller_name VARCHAR,
+    seller_rating DECIMAL,
+    seller_total_sales INT,
+    seller_avatar_url VARCHAR,
+    seller_is_verified BOOLEAN,
+    category_name VARCHAR
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        p.*,
+        u.name as seller_name,
+        u.rating as seller_rating,
+        u.total_sales as seller_total_sales,
+        u.avatar_url as seller_avatar_url,
+        u.is_verified as seller_is_verified,
+        c.name as category_name
+    FROM products p
+    JOIN users u ON p.seller_id = u.id
+    JOIN categories c ON p.category_id = c.id
+    WHERE c.name ILIKE '%' || category_name_param || '%'
+    ORDER BY 
+        p.discount DESC NULLS LAST,
+        p.created_at DESC
+    LIMIT 100;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Función para obtener marcas únicas por categoría
+CREATE OR REPLACE FUNCTION get_brands_by_category(category_id_param INT)
+RETURNS TABLE (brand VARCHAR) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT DISTINCT features->>'marca' as brand
+    FROM products 
+    WHERE category_id = category_id_param 
+      AND features->>'marca' IS NOT NULL 
+      AND features->>'marca' != ''
+    ORDER BY brand
+    LIMIT 12;
+END;
+$$ LANGUAGE plpgsql;

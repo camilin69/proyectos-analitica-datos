@@ -67,6 +67,34 @@ export class ProductController {
     }
   }
 
+  static async getSellersByCategory(req: Request, res: Response) {
+    try {
+      const { categoryId } = req.params;
+      
+      if (!categoryId || isNaN(parseInt(categoryId))) {
+        return res.status(400).json({
+          success: false,
+          message: 'ID de categoría válido requerido'
+        });
+      }
+      
+      const sellers = await ProductModel.getSellersByCategory(parseInt(categoryId));
+      
+      res.json({
+        success: true,
+        data: sellers,
+        count: sellers.length
+      });
+    } catch (error) {
+      console.error('Error al obtener vendedores por categoría:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+
   // Buscar productos
   static async searchProducts(req: Request, res: Response) {
     try {

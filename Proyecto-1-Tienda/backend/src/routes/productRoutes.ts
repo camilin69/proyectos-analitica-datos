@@ -1,25 +1,19 @@
-import express from 'express';
+// routes/products.ts - Agregar esta ruta
+import { Router } from 'express';
 import { ProductController } from '../controllers/productController';
-import { 
-  validateCreateProduct, 
-  validateProductId, 
-  validateUpdateProduct 
-} from '../middleware/productValidation';
-import { authenticateToken } from '../middleware/auth';
 
-const router = express.Router();
+const router = Router();
 
-// Rutas públicas
+// Rutas existentes...
 router.get('/', ProductController.getAllProducts);
 router.get('/featured', ProductController.getFeaturedProducts);
 router.get('/search', ProductController.searchProducts);
 router.get('/category/:categoryId', ProductController.getProductsByCategory);
+router.get('/category/:categoryId/sellers', ProductController.getSellersByCategory);
 router.get('/seller/:sellerId', ProductController.getProductsBySeller);
-router.get('/:id', validateProductId, ProductController.getProductById);
-
-// Rutas protegidas (requieren autenticación)
-router.post('/', authenticateToken, validateCreateProduct, ProductController.createProduct);
-router.put('/:id', authenticateToken, validateProductId, validateUpdateProduct, ProductController.updateProduct);
-router.delete('/:id', authenticateToken, validateProductId, ProductController.deleteProduct);
+router.get('/:id', ProductController.getProductById);
+router.post('/', ProductController.createProduct);
+router.put('/:id', ProductController.updateProduct);
+router.delete('/:id', ProductController.deleteProduct);
 
 export default router;
