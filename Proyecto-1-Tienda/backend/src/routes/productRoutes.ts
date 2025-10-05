@@ -11,6 +11,7 @@ router.get('/search', ProductController.searchProducts);
 router.get('/category/:categoryId', ProductController.getProductsByCategory);
 router.get('/category/:categoryId/sellers', ProductController.getSellersByCategory);
 router.get('/seller/:sellerId', ProductController.getProductsBySeller);
+router.get('/offers', ProductController.getProductsOnOffer);
 router.get('/:id', ProductController.getProductById);
 router.post('/', ProductController.createProduct);
 router.put('/:id', ProductController.updateProduct);

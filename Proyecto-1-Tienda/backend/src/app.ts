@@ -4,8 +4,9 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
-import productRoutes from './routes/productRoutes'; // ✅ Nueva ruta
-
+import productRoutes from './routes/productRoutes'; 
+import couponRoutes from './routes/couponRoutes';
+import categoryRoutes from './routes/categoryRoutes';
 dotenv.config();
 
 const app = express();
@@ -23,7 +24,10 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/products', productRoutes); // ✅ Nueva ruta
+app.use('/api/products', productRoutes); 
+app.use('/api/coupons', couponRoutes);
+app.use('/api/categories', categoryRoutes);
+
 
 // Health check
 app.get('/api/health', (req, res) => {

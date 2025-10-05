@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { UserModel } from '../models/userModel';
+import { UserModel } from '../models/UserModel';
 import { generateToken } from '../utils/jwt';
 import { validationResult } from 'express-validator';
 

@@ -1,6 +1,6 @@
 // pages/SellPage.tsx
-import { useAuth } from '../../context/AuthContext';
-import TopBar from '../home/TopBar';
+import { useAuth } from '../../../context/AuthContext';
+import TopBar from '../../home/TopBar';
 
 function SellPage() {
   const { user, logout } = useAuth();

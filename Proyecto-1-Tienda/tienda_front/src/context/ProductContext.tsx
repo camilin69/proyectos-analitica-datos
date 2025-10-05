@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import type { Product, ProductContextType } from '../types/product';
-import { productService } from '../services/products';
+import { productService } from '../services/product';
 import { User } from '../types/user';
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
@@ -101,6 +101,16 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
     }
   };
 
+  const getProductsOnOffer = async (): Promise<Product[]> => {
+    try {
+      const allProducts = await productService.getAllProducts();
+      return allProducts.filter(product => product.discount > 0);
+    } catch (error) {
+      console.error('Error fetching products on offer:', error);
+      return [];
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -117,7 +127,8 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
     searchProductsOnline,
     getProductsByCategoryOnline,
     getSellersByCategory,
-    getProductsByUserId
+    getProductsByUserId,
+    getProductsOnOffer
   };
 
   return (

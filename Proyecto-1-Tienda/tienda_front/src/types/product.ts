@@ -45,6 +45,7 @@ export interface ProductContextType {
   getProductsByCategoryOnline: (categoryId: number) => Promise<Product[]>;
   getSellersByCategory: (categoryId: number) => Promise<User[]>;
   getProductsByUserId: (sellerId: number) => Promise<Product[]>;
+  getProductsOnOffer: () => Promise<Product[]>;
 }
 
 export interface AuthContextType {

@@ -88,6 +88,28 @@ CREATE TABLE IF NOT EXISTS order_items (
         FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS coupons (
+    id SERIAL PRIMARY KEY,
+    code VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT NOT NULL,
+    discount_type VARCHAR(20) NOT NULL CHECK (discount_type IN ('percentage', 'fixed')),
+    discount_value DECIMAL(10,2) NOT NULL,
+    min_purchase_amount DECIMAL(10,2) DEFAULT 0,
+    max_discount_amount DECIMAL(10,2),
+    category_id INT,
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP NOT NULL,
+    usage_limit INT DEFAULT NULL,
+    used_count INT DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_coupon_category
+        FOREIGN KEY (category_id) 
+        REFERENCES categories(id)
+        ON DELETE SET NULL
+);
+
 -- Índices para users
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_cedula ON users(cedula);
@@ -177,3 +199,10 @@ BEGIN
     LIMIT 12;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Índices para coupons
+CREATE INDEX IF NOT EXISTS idx_coupons_category_id ON coupons(category_id);
+CREATE INDEX IF NOT EXISTS idx_coupons_code ON coupons(code);
+CREATE INDEX IF NOT EXISTS idx_coupons_is_active ON coupons(is_active);
+CREATE INDEX IF NOT EXISTS idx_coupons_dates ON coupons(start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_coupons_discount_type ON coupons(discount_type);

@@ -9,6 +9,7 @@ import { IoSearchOutline } from "react-icons/io5";
 import { Link } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { User, Address } from '../../types/user';
+import { useCategories } from '../../context/CategoryContext'; // Importar CategoryContext
 
 interface TopBarProps {
   user: User | null;
@@ -54,24 +55,54 @@ function TopBar({ user, onLogout }: TopBarProps) {
   const favoritesRef = useRef<HTMLDivElement>(null);
   const favoritesButtonRef = useRef<HTMLDivElement>(null);
 
+  // Usar CategoryContext para obtener categorías reales
+  const { categories: dbCategories, loading: categoriesLoading } = useCategories();
+
   const getFirstName = (fullName: string | undefined): string => {
     if (!fullName) return 'Usuario';
     return fullName.split(' ')[0];
   };
 
-  // Datos para el menú de categorías
-  const categories: CategoryItem[] = [
-    { name: 'Supermercado', href: '/category/supermarket' },
-    { name: 'Tecnología', href: '/category/tech' },
-    { name: 'Farmacia', href: '/category/pharmacy' },
-    { name: 'Electrodomesticos', href: '/category/electronics' },
-    { name: 'Hogar y Fitness', href: '/category/home' },
-    { name: 'Belleza y Cuidado Personal', href: '/category/beauty' },
-    { name: 'Juegos y Juguetes', href: '/category/toys' },
-    { name: 'Accesorios para Vehiculos', href: '/category/automotive' }
-  ];
+  // Generar categorías dinámicamente desde la base de datos
+  const generateCategoriesFromDatabase = (): CategoryItem[] => {
+    if (categoriesLoading || dbCategories.length === 0) {
+      // Fallback a categorías estáticas mientras se cargan
+      return [
+        { name: 'Supermercado', href: '/category/supermarket' },
+        { name: 'Tecnología', href: '/category/tech' },
+        { name: 'Farmacia', href: '/category/pharmacy' },
+        { name: 'Electrodomésticos', href: '/category/electronics' },
+        { name: 'Hogar y Fitness', href: '/category/home' },
+        { name: 'Belleza y Cuidado Personal', href: '/category/beauty' },
+        { name: 'Juegos y Juguetes', href: '/category/toys' },
+        { name: 'Accesorios para Vehículos', href: '/category/automotive' },
+        { name: 'Moda y Ropa', href: '/category/fashion' }
+      ];
+    }
 
-  // Datos para el menú de perfil
+    // Mapear categorías de la base de datos a enlaces
+    return dbCategories.map(category => {
+      // Crear slug a partir del nombre para la URL
+      const slug = category.name.toLowerCase()
+        .replace(/[áäâà]/g, 'a')
+        .replace(/[éëêè]/g, 'e')
+        .replace(/[íïîì]/g, 'i')
+        .replace(/[óöôò]/g, 'o')
+        .replace(/[úüûù]/g, 'u')
+        .replace(/ñ/g, 'n')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '');
+
+      return {
+        name: category.name,
+        href: `/category/${slug}`
+      };
+    });
+  };
+
+  // Categorías dinámicas desde la base de datos
+  const categories: CategoryItem[] = generateCategoriesFromDatabase();
+
   // Datos para el menú de perfil
   const profileOptions: ProfileOption[] = [
     // Header con avatar y nombre
@@ -116,7 +147,7 @@ function TopBar({ user, onLogout }: TopBarProps) {
   ];
 
   const formatAddress = (address: Address | string | undefined): string => {
-    if (!address) return 'Agregar dirección1';
+    if (!address) return 'Agregar dirección';
     
     // Si la dirección es un string, retornarla directamente
     if (typeof address === 'string') return address;
@@ -128,6 +159,26 @@ function TopBar({ user, onLogout }: TopBarProps) {
     }
     return 'Agregar dirección';
   };
+
+  // Generar enlaces de navegación principales desde categorías populares
+  const getMainNavigationLinks = (): CategoryItem[] => {
+    // Seleccionar algunas categorías populares para la navegación principal
+    const popularCategories = categories.filter(cat => 
+      ['supermercado', 'tecnología', 'farmacia', 'moda', 'electrodomésticos']
+        .some(popular => cat.name.toLowerCase().includes(popular))
+    ).slice(0, 4); // Tomar máximo 4 categorías
+
+    // Agregar enlaces fijos
+    return [
+      { name: 'Ofertas', href: '/offers' },
+      { name: 'Cupones', href: '/coupons' },
+      ...popularCategories,
+      { name: 'Vender', href: '/sell' },
+      { name: 'Ayuda / PQR', href: '/help' }
+    ];
+  };
+
+  const mainNavigationLinks = getMainNavigationLinks();
 
   // Calcular posición de todos los dropdowns
   useEffect(() => {
@@ -237,26 +288,17 @@ function TopBar({ user, onLogout }: TopBarProps) {
               </button>
             </div>
             
-            {/* Enlaces de navegación - SIN SCROLL HORIZONTAL */}
+            {/* Enlaces de navegación dinámicos */}
             <div className="flex items-center flex-1 min-w-0 overflow-hidden">
-              <a href="/offers" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
-                Ofertas
-              </a>
-              <a href="/coupons" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
-                Cupones
-              </a>
-              <a href="/supermarket" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
-                Supermercado
-              </a>
-              <a href="/fashion" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
-                Moda
-              </a>
-              <Link to="/sell" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
-                Vender
-              </Link>
-              <a href="/help" className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0">
-                Ayuda / PQR
-              </a>
+              {mainNavigationLinks.map((link, index) => (
+                <Link 
+                  key={index}
+                  to={link.href}
+                  className="whitespace-nowrap text-sm hover:text-gray-700 transition duration-200 px-2 py-1 h-8 flex items-center flex-shrink-0"
+                >
+                  {link.name}
+                </Link>
+              ))}
             </div>
           </nav>
           
@@ -327,7 +369,7 @@ function TopBar({ user, onLogout }: TopBarProps) {
       {showCategories && (
         <div 
           ref={categoriesRef}
-          className="fixed z-50 bg-white rounded-md shadow-lg border border-gray-200 w-48"
+          className="fixed z-50 bg-white rounded-md shadow-lg border border-gray-200 w-48 max-h-[70vh] overflow-hidden"
           onMouseEnter={() => setShowCategories(true)}
           onMouseLeave={() => setShowCategories(false)}
         >
@@ -339,17 +381,26 @@ function TopBar({ user, onLogout }: TopBarProps) {
             }}
           ></div>
           
-          <div className="relative bg-white rounded-md py-1 z-10">
-            {categories.map((category, index) => (
-              <Link
-                key={index}
-                to={category.href}
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-150"
-                onClick={() => setShowCategories(false)}
-              >
-                {category.name}
-              </Link>
-            ))}
+          <div className="relative bg-white rounded-md max-h-[65vh] overflow-y-auto">
+            {categoriesLoading ? (
+              // Estado de carga
+              <div className="p-4 text-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
+                <p className="text-xs text-gray-500">Cargando categorías...</p>
+              </div>
+            ) : (
+              // Lista de categorías
+              categories.map((category, index) => (
+                <Link
+                  key={index}
+                  to={category.href}
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-150"
+                  onClick={() => setShowCategories(false)}
+                >
+                  {category.name}
+                </Link>
+              ))
+            )}
           </div>
         </div>
       )}
@@ -358,7 +409,7 @@ function TopBar({ user, onLogout }: TopBarProps) {
       {showProfile && (
         <div 
           ref={profileRef}
-          className="fixed z-50 bg-white rounded-md shadow-lg border border-gray-200 w-64"
+          className="fixed z-50 bg-white rounded-md shadow-lg border border-gray-200 w-64 max-h-[80vh] overflow-hidden"
           onMouseEnter={() => setShowProfile(true)}
           onMouseLeave={() => setShowProfile(false)}
         >
@@ -370,7 +421,8 @@ function TopBar({ user, onLogout }: TopBarProps) {
             }}
           ></div>
           
-          <div className="relative bg-white rounded-md">
+          {/* Contenedor con scroll */}
+          <div className="relative bg-white rounded-md max-h-[70vh] overflow-y-auto">
             {profileOptions.map((option, index) => {
               // Header con avatar y nombre
               if (option.isHeader) {
@@ -378,7 +430,7 @@ function TopBar({ user, onLogout }: TopBarProps) {
                   <Link
                     key="profile-header"
                     to="/profile"
-                    className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 transition duration-150 border-b border-gray-100"
+                    className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 transition duration-150 border-b border-gray-100 sticky top-0 bg-white z-10"
                     onClick={() => setShowProfile(false)}
                   >
                     <div className="w-10 h-10 rounded-full bg-gray-300 overflow-hidden border border-gray-400 flex-shrink-0">

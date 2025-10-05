@@ -1,5 +1,6 @@
 import { QueryResult } from 'pg';
 import pool from './database';
+import { User } from './UserModel';
 
 export interface Product {
   id: number;
@@ -18,7 +19,7 @@ export interface Product {
   updated_at: string;
 }
 
-export interface ProductWithDetails extends Product {
+export interface ProductWithDetails extends ProductModel {
   seller_name: string;
   seller_rating: number;
   seller_total_sales: number;
@@ -108,9 +109,10 @@ export class ProductModel {
     return result.rows;
   }
 
-  static async getSellersByCategory(categoryId: number): Promise<string[]> {
+  static async getSellersByCategory(categoryId: number): Promise<User[]> {
     const query = `
-      SELECT DISTINCT *
+      SELECT DISTINCT 
+        u.*
       FROM products p
       JOIN users u ON p.seller_id = u.id
       WHERE p.category_id = $1
@@ -119,12 +121,29 @@ export class ProductModel {
     `;
     
     const result: QueryResult = await pool.query(query, [categoryId]);
-    
-    // Filtrar y limpiar los nombres de vendedores
     return result.rows
   }
 
-
+  static async getProductsOnOffer(): Promise<ProductWithDetails[]> {
+    const query = `
+      SELECT 
+        p.*,
+        u.name as seller_name,
+        u.rating as seller_rating,
+        u.total_sales as seller_total_sales,
+        u.avatar_url as seller_avatar_url,
+        u.is_verified as seller_is_verified,
+        c.name as category_name
+      FROM products p
+      JOIN users u ON p.seller_id = u.id
+      JOIN categories c ON p.category_id = c.id
+      WHERE p.discount > 0
+      ORDER BY p.discount DESC, p.created_at DESC
+    `;
+    
+    const result: QueryResult = await pool.query(query);
+    return result.rows;
+  }
 
   // Buscar productos por texto
   static async search(query: string): Promise<ProductWithDetails[]> {

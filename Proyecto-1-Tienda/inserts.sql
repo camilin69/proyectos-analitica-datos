@@ -10,8 +10,8 @@ INSERT INTO categories (name, description) VALUES
 ('home', 'Hogar, muebles y fitness'),
 ('beauty', 'Belleza y cuidado personal'),
 ('toys', 'Juegos y juguetes'),
-('automotive', 'Accesorios para vehículos')
-ON CONFLICT (name) DO NOTHING;
+('automotive', 'Accesorios para vehículos'),
+('fashion', 'Ropa, calzado y accesorios de moda para hombres y mujeres');
 
 -- Insertar usuarios/vendedores (2 por cada categoría)
 INSERT INTO users (name, email, cedula, phone, password, avatar_url, bio, rating, total_sales, is_verified, address, social_links) VALUES
@@ -253,8 +253,9 @@ INSERT INTO users (name, email, cedula, phone, password, avatar_url, bio, rating
     true,
     '{"street": "Calle 100 #19-55", "city": "Bogotá", "state": "Cundinamarca", "zipCode": "110221", "country": "Colombia"}',
     '{"website": "https://carstyle.co", "instagram": "carstyle_co"}'
-);
-
+),
+('Moda Elegante', 'contacto@modaelegante.com', '98765432101', '+57 1 9876543', '$2a$12$4zCKAig81IK1JN5LZSMGo.Zp9LdhLSOMOI8QEPjMC82apUGCZQI/u', 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face', 'Tu tienda de moda premium con las últimas tendencias y diseños exclusivos.', 4.8, 150, true, '{"street": "Calle 85 #15-30", "city": "Bogotá", "state": "Cundinamarca", "country": "Colombia", "zipCode": "110221"}', '{"website": "https://modaelegante.com", "instagram": "modaelegante_co"}'),
+('Style Urban', 'info@styleurban.com', '98765432102', '+57 1 9876544', '$2a$12$4zCKAig81IK1JN5LZSMGo.Zp9LdhLSOMOI8QEPjMC82apUGCZQI/u', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face', 'Moda urbana y contemporánea para el estilo de vida moderno.', 4.6, 89, true, '{"street": "Carrera 11 #85-45", "city": "Medellín", "state": "Antioquia", "country": "Colombia", "zipCode": "050021"}', '{"website": "https://styleurban.com", "instagram": "styleurban_co"}');
 -- Insertar productos disponibles para venta (2 productos por cada usuario)
 INSERT INTO products (name, price, discount, seller_id, stock, images, condition, tags, description, category_id, features) VALUES
 -- Categoría: Supermercado (Usuario 1 - SuperMarket Express)
@@ -887,4 +888,49 @@ INSERT INTO products (name, price, discount, seller_id, stock, images, condition
         "proteccion": "Antimanchas, antidesgaste",
         "limpieza": "Fácil"
     }'
-);
+),
+('Camisa Casual Hombre', 89900.00, 15.00, 17, 25, '["https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&h=400&fit=crop"]', 'new', '["camisa", "hombre", "casual", "algodón", "moda"]', 'Camisa casual para hombre 100% algodón. Perfecta para ocasiones informales y oficina.', 9, '{"material": "Algodón", "tallas": ["S", "M", "L", "XL"], "color": "Azul", "marca": "Moda Elegante", "cuidado": "Lavable a máquina"}'),
+
+('Vestido Elegante Mujer', 129900.00, 20.00, 17, 15, '["https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600&h=400&fit=crop"]', 'new', '["vestido", "mujer", "elegante", "noche", "moda"]', 'Vestido elegante para ocasiones especiales. Diseño sofisticado y cómodo.', 9, '{"material": "Poliéster", "tallas": ["XS", "S", "M", "L"], "color": "Negro", "marca": "Moda Elegante", "ocasión": "Noche"}'),
+
+('Jeans Slim Fit', 75900.00, 10.00, 18, 30, '["https://images.unsplash.com/photo-1542272604-787c3835535d?w=600&h=400&fit=crop"]', 'new', '["jeans", "slim", "denim", "moda", "urbano"]', 'Jeans slim fit de alta calidad. Corte moderno y cómodo para uso diario.', 9, '{"material": "Denim", "tallas": ["28", "30", "32", "34", "36"], "color": "Azul oscuro", "marca": "Style Urban", "estilo": "Slim Fit"}'),
+
+('Chaqueta de Cuero', 189900.00, 25.00, 18, 12, '["https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&h=400&fit=crop"]', 'new', '["chaqueta", "cuero", "urbano", "moda", "abrigo"]', 'Chaqueta de cuero genuino. Diseño urbano y resistente para todas las temporadas.', 9, '{"material": "Cuero genuino", "tallas": ["S", "M", "L", "XL"], "color": "Negro", "marca": "Style Urban", "forro": "Poliéster"}');
+
+-- Inserts de cupones (2 por categoría)
+INSERT INTO coupons (code, description, discount_type, discount_value, min_purchase_amount, max_discount_amount, category_id, start_date, end_date, usage_limit, is_active) VALUES 
+-- Cupones para Supermercado (1)
+('SUPER10', '10% de descuento en supermercado', 'percentage', 10.00, 50000.00, 20000.00, 1, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 1000, true),
+('SUPER5000', '$5.000 OFF en compras mayores a $50.000', 'fixed', 5000.00, 50000.00, NULL, 1, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 500, true),
+
+-- Cupones para Tecnología (2)
+('TECH15', '15% de descuento en tecnología', 'percentage', 15.00, 100000.00, 50000.00, 2, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 800, true),
+('TECH20000', '$20.000 OFF en productos tech', 'fixed', 20000.00, 150000.00, NULL, 2, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 300, true),
+
+-- Cupones para Farmacia (3)
+('FARM12', '12% de descuento en farmacia', 'percentage', 12.00, 30000.00, 15000.00, 3, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 1200, true),
+('FARM8000', '$8.000 OFF en medicamentos', 'fixed', 8000.00, 40000.00, NULL, 3, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 600, true),
+
+-- Cupones para Electrodomésticos (4)
+('ELECTRO20', '20% de descuento en electrodomésticos', 'percentage', 20.00, 200000.00, 100000.00, 4, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 400, true),
+('ELECTRO50000', '$50.000 OFF en electrodomésticos', 'fixed', 50000.00, 300000.00, NULL, 4, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 200, true),
+
+-- Cupones para Hogar y Fitness (5)
+('HOGAR15', '15% de descuento en hogar y fitness', 'percentage', 15.00, 80000.00, 30000.00, 5, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 700, true),
+('HOGAR12000', '$12.000 OFF en hogar', 'fixed', 12000.00, 60000.00, NULL, 5, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 450, true),
+
+-- Cupones para Belleza (6)
+('BELLEZA25', '25% de descuento en belleza', 'percentage', 25.00, 40000.00, 25000.00, 6, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 900, true),
+('BELLEZA15000', '$15.000 OFF en cuidado personal', 'fixed', 15000.00, 75000.00, NULL, 6, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 350, true),
+
+-- Cupones para Juguetes (7)
+('JUGUETES30', '30% de descuento en juguetes', 'percentage', 30.00, 50000.00, 20000.00, 7, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 600, true),
+('JUGUETES10000', '$10.000 OFF en juegos', 'fixed', 10000.00, 30000.00, NULL, 7, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 400, true),
+
+-- Cupones para Automotriz (8)
+('AUTO18', '18% de descuento en accesorios auto', 'percentage', 18.00, 70000.00, 35000.00, 8, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 550, true),
+('AUTO25000', '$25.000 OFF en repuestos', 'fixed', 25000.00, 120000.00, NULL, 8, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 250, true),
+
+-- Cupones para Moda (9)
+('MODA20', '20% de descuento en moda y ropa', 'percentage', 20.00, 60000.00, 30000.00, 9, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 800, true),
+('MODA15000', '$15.000 OFF en ropa', 'fixed', 15000.00, 80000.00, NULL, 9, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 500, true);

@@ -120,6 +120,19 @@ class ProductService {
     }
   }
 
+  async getProductsOnOffer(): Promise<Product[]> {
+    try {
+      const response = await fetch(`${this.baseURL}/offers`);
+      if (!response.ok) {
+        throw new Error('Error al obtener productos en oferta');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching products on offer:', error);
+      throw error;
+    }
+  }
+
   // Buscar productos (OPTIMIZADO)
   async searchProducts(query: string, categoryId?: number): Promise<Product[]> {
     try {

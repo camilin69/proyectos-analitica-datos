@@ -1,7 +1,8 @@
-// App.tsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProductProvider } from './context/ProductContext';
+import { CategoryProvider } from './context/CategoryContext';
+import { CouponProvider } from './context/CouponContext';
 import Login from './components/auth/Login';
 import PrincipalPage from './components/pages/PrincipalPage';
 import SellPage from './components/pages/SellPage';
@@ -10,6 +11,8 @@ import ProductDetailPage from './components/pages/ProductDetail';
 import LoadingSpinner from './components/products/LoadingSpinner';
 import CategoryPage from './components/pages/CategoryPage';
 import ProfileSeller from './components/pages/ProfileSeller';
+import OffersPage from './components/pages/OffersPage';
+import CouponsPage from './components/pages/CouponsPage';
 
 // Componente para proteger rutas
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -45,56 +48,74 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <ProductProvider>
-          <div className="App">
-            <Routes>
-              {/* Ruta pública - Login */}
-              <Route path="/login" element={
-                <PublicRoute>
-                  <Login />
-                </PublicRoute>
-              } />
-              
-              {/* Rutas protegidas */}
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <PrincipalPage />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/sell" element={
-                <ProtectedRoute>
-                  <SellPage />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/product/:id" element={
-                <ProtectedRoute>
-                  <ProductDetailPage />
-                </ProtectedRoute>
-              } />
+        <CategoryProvider>
+          <ProductProvider>
+            <CouponProvider>
+              <div className="App">
+                <Routes>
+                  {/* Ruta pública - Login */}
+                  <Route path="/login" element={
+                    <PublicRoute>
+                      <Login />
+                    </PublicRoute>
+                  } />
+                  
+                  {/* Rutas protegidas */}
+                  <Route path="/" element={
+                    <ProtectedRoute>
+                      <PrincipalPage />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/sell" element={
+                    <ProtectedRoute>
+                      <SellPage />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/profile" element={
+                    <ProtectedRoute>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/product/:id" element={
+                    <ProtectedRoute>
+                      <ProductDetailPage />
+                    </ProtectedRoute>
+                  } />
 
-              <Route path="/category/:categoryName" element={
-                <ProtectedRoute>
-                  <CategoryPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/profile/:sellerId" element={
-                <ProtectedRoute>
-                  <ProfileSeller />
-                </ProtectedRoute>
-              } />
-              {/* Ruta 404 */}
-              <Route path="*" element={<div>Página no encontrada</div>} />
-            </Routes>
-          </div>
-        </ProductProvider>
+                  <Route path="/category/:categoryName" element={
+                    <ProtectedRoute>
+                      <CategoryPage />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/profile/:sellerId" element={
+                    <ProtectedRoute>
+                      <ProfileSeller />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/offers" element={
+                    <ProtectedRoute>
+                      <OffersPage />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/coupons" element={
+                    <ProtectedRoute>
+                      <CouponsPage />
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* Ruta 404 */}
+                  <Route path="*" element={<div>Página no encontrada</div>} />
+                </Routes>
+              </div>
+            </CouponProvider>
+          </ProductProvider>
+        </CategoryProvider>
       </AuthProvider>
     </Router>
   );

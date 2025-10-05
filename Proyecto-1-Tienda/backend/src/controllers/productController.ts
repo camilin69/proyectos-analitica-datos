@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ProductModel, ProductWithDetails } from '../models/Product';
+import { ProductModel, ProductWithDetails } from '../models/ProductModel';
 
 export class ProductController {
   // Obtener todos los productos
@@ -87,6 +87,24 @@ export class ProductController {
       });
     } catch (error) {
       console.error('Error al obtener vendedores por categoría:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  static async getProductsOnOffer(req: Request, res: Response) {
+    try {
+      const products = await ProductModel.getProductsOnOffer();
+
+      res.json({
+        success: true,
+        data: products,
+        count: products.length
+      });
+    } catch (error) {
+      console.error('Error al obtener productos en oferta:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'

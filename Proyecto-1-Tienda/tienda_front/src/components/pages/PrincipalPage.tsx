@@ -37,7 +37,7 @@ function PrincipalPage() {
     };
 
     loadFeaturedProducts();
-  }, [getFeaturedProducts]);
+  }, [getFeaturedProducts, user]);
 
   // Cargar productos por categoría cuando se selecciona una
   useEffect(() => {
