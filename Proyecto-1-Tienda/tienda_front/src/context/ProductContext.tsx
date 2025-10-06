@@ -111,6 +111,29 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
     }
   };
 
+  const createProduct = async (
+    productData: Omit<Product, 'id' | 'created_at' | 'updated_at'>, 
+    token: string
+  ): Promise<Product> => {
+    try {
+      setLoading(true);
+      setError(null);
+      const newProduct = await productService.createProduct(productData, token);
+      
+      // Actualizar la lista local de productos
+      setProducts(prevProducts => [...prevProducts, newProduct]);
+      
+      return newProduct;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido al crear producto';
+      setError(errorMessage);
+      console.error('Error creating product:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -128,7 +151,8 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({ children }) =>
     getProductsByCategoryOnline,
     getSellersByCategory,
     getProductsByUserId,
-    getProductsOnOffer
+    getProductsOnOffer,
+    createProduct
   };
 
   return (

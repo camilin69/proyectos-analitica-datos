@@ -46,6 +46,10 @@ export interface ProductContextType {
   getSellersByCategory: (categoryId: number) => Promise<User[]>;
   getProductsByUserId: (sellerId: number) => Promise<Product[]>;
   getProductsOnOffer: () => Promise<Product[]>;
+  createProduct: (
+    productData: Omit<Product, 'id' | 'created_at' | 'updated_at'>, 
+    token: string
+  ) => Promise<Product>;
 }
 
 export interface AuthContextType {

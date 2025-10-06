@@ -5,7 +5,7 @@ import { CategoryProvider } from './context/CategoryContext';
 import { CouponProvider } from './context/CouponContext';
 import Login from './components/auth/Login';
 import PrincipalPage from './components/pages/PrincipalPage';
-import SellPage from './components/pages/SellPage';
+import SellPage from './components/pages/sell/SellPage';
 import ProfilePage from './components/pages/ProfilePage';
 import ProductDetailPage from './components/pages/ProductDetail';
 import LoadingSpinner from './components/products/LoadingSpinner';
@@ -13,6 +13,8 @@ import CategoryPage from './components/pages/CategoryPage';
 import ProfileSeller from './components/pages/ProfileSeller';
 import OffersPage from './components/pages/OffersPage';
 import CouponsPage from './components/pages/CouponsPage';
+import SellProductPage from './components/pages/sell/SellProductPage';
+import EditFeaturesProduct from './components/pages/sell/EditFeaturesProduct';
 
 // Componente para proteger rutas
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -70,6 +72,24 @@ function App() {
                   <Route path="/sell" element={
                     <ProtectedRoute>
                       <SellPage />
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/sell/product/:id" element={
+                    <ProtectedRoute>
+                      <SellProductPage />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/sell/new-product" element={
+                    <ProtectedRoute>
+                      <EditFeaturesProduct />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/sell/edit-product" element={
+                    <ProtectedRoute>
+                      <EditFeaturesProduct />
                     </ProtectedRoute>
                   } />
                   

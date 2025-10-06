@@ -50,7 +50,7 @@ class ProductService {
   // Obtener producto por ID
   async getProductById(id: string): Promise<Product> {
     try {
-      const response = await fetch(`${this.baseURL}/${id}`);
+      const response = await fetch(`${this.baseURL}/product/${id}`);
       const result: ApiResponse<Product> = await this.handleResponse(response);
       return result.data;
     } catch (error) {
@@ -170,7 +170,7 @@ class ProductService {
   // Crear producto (requiere autenticación)
   async createProduct(productData: Omit<Product, 'id' | 'created_at' | 'updated_at'>, token: string): Promise<Product> {
     try {
-      const response = await fetch(`${this.baseURL}`, {
+      const response = await fetch(`${this.baseURL}/product/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -189,7 +189,7 @@ class ProductService {
   // Actualizar producto (requiere autenticación)
   async updateProduct(id: string, productData: Partial<Product>, token: string): Promise<Product> {
     try {
-      const response = await fetch(`${this.baseURL}/${id}`, {
+      const response = await fetch(`${this.baseURL}/product/update/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -208,7 +208,7 @@ class ProductService {
   // Eliminar producto (requiere autenticación)
   async deleteProduct(id: string, token: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseURL}/${id}`, {
+      const response = await fetch(`${this.baseURL}/product/delete/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
