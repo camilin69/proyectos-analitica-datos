@@ -1,0 +1,19 @@
+# documents_backend/Dockerfile.chroma-init
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar script de inicialización
+COPY init-chroma.py .
+COPY requirements.txt .
+
+# Instalar chromadb para el script de inicialización
+RUN pip install --no-cache-dir chromadb
+
+# Ejecutar script de inicialización
+CMD ["python", "init-chroma.py"]

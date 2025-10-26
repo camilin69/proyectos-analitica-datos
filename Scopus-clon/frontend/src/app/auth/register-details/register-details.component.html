@@ -1,0 +1,167 @@
+<div class="register-details-container">
+  <div class="register-details-header">
+    <div class="scopus-logo">
+      <h1>Scopus</h1>
+    </div>
+  </div>
+
+  <div class="register-details-content">
+    <div class="register-details-card">
+      <div class="card-header">
+        <h2>Complete your registration</h2>
+        <p class="info-text">Please fill in your details to create your Scopus account</p>
+      </div>
+
+      <div class="card-body">
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+          <div *ngIf="errorMessage" class="error-message">
+            {{ errorMessage }}
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName">First Name *</label>
+              <input
+                type="text"
+                id="firstName"
+                formControlName="firstName"
+                class="form-control"
+                [class.invalid]="firstName?.invalid && firstName?.touched"
+                placeholder="First name"
+              />
+              <span *ngIf="firstName?.invalid && firstName?.touched" class="validation-error">
+                <span *ngIf="firstName?.errors?.['required']">First name is required</span>
+                <span *ngIf="firstName?.errors?.['minlength']">Must be at least 2 characters</span>
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="lastName">Last Name *</label>
+              <input
+                type="text"
+                id="lastName"
+                formControlName="lastName"
+                class="form-control"
+                [class.invalid]="lastName?.invalid && lastName?.touched"
+                placeholder="Last name"
+              />
+              <span *ngIf="lastName?.invalid && lastName?.touched" class="validation-error">
+                <span *ngIf="lastName?.errors?.['required']">Last name is required</span>
+                <span *ngIf="lastName?.errors?.['minlength']">Must be at least 2 characters</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email *</label>
+            <input
+              type="email"
+              id="email"
+              formControlName="email"
+              class="form-control"
+              [class.invalid]="email?.invalid && email?.touched"
+              placeholder="Email address"
+            />
+            <span *ngIf="email?.invalid && email?.touched" class="validation-error">
+              <span *ngIf="email?.errors?.['required']">Email is required</span>
+              <span *ngIf="email?.errors?.['email']">Please enter a valid email</span>
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="institution">Institution</label>
+            <select
+              id="institution"
+              formControlName="institutionId"
+              class="form-control"
+              [class.invalid]="institutionId?.invalid && institutionId?.touched"
+            >
+              <option value="">Select your institution</option>
+              <option *ngFor="let institution of institutions" [value]="institution.id">
+                {{ institution.name }}
+              </option>
+            </select>
+            <span *ngIf="institutionId?.invalid && institutionId?.touched" class="validation-error">
+              Institution is required
+            </span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="password">Password *</label>
+              <div class="password-input">
+                <input
+                  [type]="showPassword ? 'text' : 'password'"
+                  id="password"
+                  formControlName="password"
+                  class="form-control"
+                  [class.invalid]="password?.invalid && password?.touched"
+                  placeholder="Create password"
+                />
+                <button
+                  type="button"
+                  class="toggle-password"
+                  (click)="togglePasswordVisibility('password')"
+                >
+                  <i class="material-icons">{{ showPassword ? 'visibility_off' : 'visibility' }}</i>
+                </button>
+              </div>
+              <span *ngIf="password?.invalid && password?.touched" class="validation-error">
+                <span *ngIf="password?.errors?.['required']">Password is required</span>
+                <span *ngIf="password?.errors?.['minlength']">Must be at least 6 characters</span>
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="confirmPassword">Confirm Password *</label>
+              <div class="password-input">
+                <input
+                  [type]="showConfirmPassword ? 'text' : 'password'"
+                  id="confirmPassword"
+                  formControlName="confirmPassword"
+                  class="form-control"
+                  [class.invalid]="confirmPassword?.invalid && confirmPassword?.touched"
+                  placeholder="Confirm password"
+                />
+                <button
+                  type="button"
+                  class="toggle-password"
+                  (click)="togglePasswordVisibility('confirmPassword')"
+                >
+                  <i class="material-icons">{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</i>
+                </button>
+              </div>
+              <span *ngIf="confirmPassword?.errors?.['passwordMismatch'] && confirmPassword?.touched" 
+                    class="validation-error">
+                Passwords do not match
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="agreeToTerms" />
+              <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span>
+            </label>
+            <span *ngIf="agreeToTerms?.invalid && agreeToTerms?.touched" class="validation-error">
+              You must agree to the terms and conditions
+            </span>
+          </div>
+
+          <button
+            type="submit"
+            class="btn-primary"
+            [disabled]="isLoading || registerForm.invalid"
+          >
+            <span *ngIf="isLoading" class="loading-spinner"></span>
+            {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+          </button>
+        </form>
+
+        <div class="card-footer">
+          <p>Already have an account? <a routerLink="/auth/login">Sign in</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

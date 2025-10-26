@@ -1,0 +1,55 @@
+<div class="search-container">
+  <div class="search-header">
+    <h1>Start exploring</h1>
+  </div>
+
+  <div class="search-tabs">
+    <div class="tabs-container">
+      <button 
+        *ngFor="let type of searchTypes"
+        [class.active]="searchType === type.value"
+        (click)="searchType = type.value"
+        class="tab-button"
+      >
+        {{ type.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Form Depending on Tab Selected -->
+  <div [ngSwitch]="searchType">
+    
+    <!-- Documents Search -->
+    <app-search-documents *ngSwitchCase="'documents'"></app-search-documents>
+    
+    <!-- Authors Search -->
+    <app-search-authors *ngSwitchCase="'authors'"></app-search-authors>
+    
+    <!-- Organizations Search -->
+    <app-search-organizations *ngSwitchCase="'organizations'"></app-search-organizations>
+    
+    <!-- Researcher Discovery Search -->
+    <app-search-researcher-discovery *ngSwitchCase="'researcher-discovery'"></app-search-researcher-discovery>
+    
+    <!-- Default (Documents) -->
+    <app-search-documents *ngSwitchDefault></app-search-documents>
+    
+  </div>
+
+  <!-- Search History -->
+  <div class="search-sidebar">
+    <div class="sidebar-section">
+      <h3>Search History</h3>
+      <div class="empty-state">
+        Start searching and your history will appear here.
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Saved Searches</h3>
+      <div class="empty-state">
+        If you need help to start searching, see our search tips.
+      </div>
+    </div>
+  </div>
+</div>

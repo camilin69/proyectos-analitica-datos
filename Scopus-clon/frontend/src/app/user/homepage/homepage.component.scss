@@ -1,0 +1,32 @@
+// src/app/user/homepage/homepage.component.scss
+.homepage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding: 0;
+}
+
+.debug-buttons {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  
+  button {
+    background: #ff6b00;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    
+    &:hover {
+      background: #e65c00;
+    }
+  }
+}

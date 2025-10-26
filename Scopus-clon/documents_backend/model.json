@@ -1,0 +1,64 @@
+{
+    "id":1,
+    "article_title":"Técnicas avanzadas de análisis de datos",
+    "abstract":"Este documento explora las técnicas avanzadas de análisis de datos...",
+    "authors":["Juan Pérez", "María Gómez"],
+    "keywords":["análisis de datos", "técnicas avanzadas", "big data"],
+    "institution":{
+        "id":1,
+        "name":"Universidad de Datos Avanzados",
+        "city":"Madrid",
+        "country":"España"
+    },
+    "funding":{
+        "id":1,
+        "information":"Agencia Nacional de Investigación",
+        "sponsor":"Ministerio de Ciencia e Innovación",
+        "acronym":"ANID",
+        "number":"ANID-2024-12345"
+    },
+    "lenguage":"Español",
+    "issn":"1234-5678",
+    "coden":"ABCD12",
+    "doi":"10.1234/abcd.2024.56789",
+    "references":[
+        {
+            "id":1,
+            "reference_text":"García, L. (2020). Introducción al análisis de datos. Editorial DataScience."
+        },
+        {
+            "id":2,
+            "reference_text":"Smith, J. (2019). Big Data y su impacto en la investigación. Journal of Data Research, 15(3), 45-60."
+        }
+    ],
+    "coderence":"A1B2C3",
+    "chemical_name":"N/A",
+    "cas_number":"N/A",
+    "orcid":"0000-0002-1825-0097",
+    "publication_date":"2024-05-15",
+    "cites_count":25,
+    "document_type":"Artículo de revista",
+    "content":{
+        "sections":[
+            {
+                "title":"Introducción",
+                "text":"El análisis de datos es una disciplina fundamental en la era digital..."
+            },
+            {
+                "title":"Metodología",
+                "text":"Se emplearon técnicas de minería de datos y aprendizaje automático para..."
+            },
+            {
+                "title":"Resultados",
+                "text":"Los resultados indican una mejora significativa en la precisión del análisis..."
+            },
+            {
+                "title":"Conclusiones",
+                "text":"Las técnicas avanzadas de análisis de datos son esenciales para extraer información valiosa..."
+            }
+        ]
+    },
+    "subject_areas":["Ciencias de la Computación", "Estadística"],
+    "source_title":"Revista Internacional de Análisis de Datos",
+    "publisher":"Editorial DataScience"
+}

@@ -1,0 +1,66 @@
+<div class="login-container">
+
+  <div class="login-content">
+    <div class="login-card">
+      <div class="card-header">
+        <h1>Sign in</h1>
+      </div>
+
+      <div class="card-body">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div *ngIf="errorMessage" class="error-message">
+            {{ errorMessage }}
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              formControlName="email"
+              class="form-control"
+              [class.invalid]="email?.invalid && email?.touched"
+              placeholder="Enter your email"
+              autocomplete="email"
+            />
+            <span *ngIf="email?.invalid && email?.touched" class="validation-error">
+              <span *ngIf="email?.errors?.['required']">Email is required</span>
+              <span *ngIf="email?.errors?.['email']">Please enter a valid email</span>
+            </span>
+          </div>
+
+          <button
+            type="submit"
+            class="btn-primary"
+            [disabled]="isLoading || loginForm.invalid"
+          >
+            <span *ngIf="isLoading" class="loading-spinner"></span>
+            {{ isLoading ? 'Continuing...' : 'Continue' }}
+          </button>
+        </form>
+
+        <div class="login-options">
+          <button class="btn-link" (click)="tryAnotherAccount()">
+            Try another account
+          </button>
+          
+          <div class="divider">
+            <span>or</span>
+          </div>
+
+          <button class="btn-outline" (click)="navigateToOrganizationLogin()">
+            Sign in via your organization
+          </button>
+
+          <button class="btn-text" (click)="navigateToHelp()">
+            Get help with access
+          </button>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <p>Don't have an account? <a routerLink="/auth/register">Create one</a></p>
+      </div>
+    </div>
+  </div>
+</div>

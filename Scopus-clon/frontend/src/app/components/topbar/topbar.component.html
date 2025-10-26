@@ -1,0 +1,79 @@
+<header class="topbar">
+  <div class="institution-banner" *ngIf="isLoggedIn()">
+    <div class="banner-content">
+      <span>Brought to you by Universidad Pedagógica y Tecnológica de Colombia</span>
+    </div>
+  </div>
+  <div class="topbar-container">
+    <!-- Logo a la izquierda -->
+    <div class="topbar-left">
+      <a [routerLink]="isLoggedIn() ? '/' : '/preview'" class="logo-link">
+        <div class="logo-container">
+          <img [src]="elsevierLogoUrl" class="elsevier-logo">
+          
+          <!-- Texto según estado -->
+          <ng-container *ngIf="isLoggedIn(); else previewText">
+            <img [src]="scopusTextUrl" class="logo-text">
+          </ng-container>
+          <ng-template #previewText>
+            <img [src]="scopusPreviewTextUrl" class="logo-text">
+          </ng-template>
+        </div>
+      </a>
+    </div>
+
+    <!-- Navegación a la derecha -->
+    <div class="topbar-right">
+      <nav class="topbar-nav">
+        <ng-container *ngIf="isLoggedIn(); else unauthenticatedMenu">
+          <button class="nav-link" (click)="navigateToAuthorSearch()">
+            <img [src]="searchIconUrl" class="search-icon">
+            Search
+          </button>
+          <button class="nav-link" (click)="navigateToSources()">
+            Sources
+          </button>
+          <img [src]="infoIconUrl" class="info-link">
+          <img [src]="notificationsIconUrl" class="notifications-link">
+          <img [src]="institutionIconUrl" class="institution-link">
+
+          <!-- Menú de usuario -->
+          <div class="user-menu">
+            <button class="user-btn">
+              <i class="material-icons">account_circle</i>
+              <span class="user-name">{{ currentUser()?.firstName }}</span>
+              <i class="material-icons dropdown-arrow">arrow_drop_down</i>
+            </button>
+            <div class="user-dropdown">
+              <button class="dropdown-item" (click)="logout()">
+                <i class="material-icons">logout</i>
+                Sign out
+              </button>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Menú para usuarios no autenticados (Preview) -->
+        <ng-template #unauthenticatedMenu>
+          <button class="nav-link" (click)="navigateToAuthorSearch()">
+            <img [src]="searchIconUrl" class="search-icon">
+            Author Search
+          </button>
+          <button class="nav-link" (click)="navigateToSources()">
+            Sources
+          </button>
+          <img [src]="infoIconUrl" class="info-link">
+          <img [src]="institutionIconUrl" class="institution-link">
+
+          <a class="create-account-btn" routerLink="/auth/register">
+            Create account
+          </a>
+          <a class="sign-in-btn" routerLink="/auth/login">
+            Sign in
+          </a>
+          
+        </ng-template>
+      </nav>
+    </div>
+  </div>
+</header>

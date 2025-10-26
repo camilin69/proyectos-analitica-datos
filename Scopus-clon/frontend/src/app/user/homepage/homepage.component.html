@@ -1,0 +1,13 @@
+<!-- src/app/user/homepage/homepage.component.html -->
+<div class="homepage">
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+
+  <!-- Botones de testing (quitar en producción) -->
+  <div class="debug-buttons">
+    <button (click)="logout()">Simular Logout</button>
+  </div>
+</div>

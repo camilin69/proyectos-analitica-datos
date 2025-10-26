@@ -1,0 +1,372 @@
+// src/app/user/document/document.component.scss
+.document-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.document-header {
+  margin-bottom: 2rem;
+  
+  .btn-back {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: 1px solid #ccc;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: #f5f5f5;
+      border-color: #0056d6;
+    }
+    
+    i {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+.loading-state, .error-state {
+  text-align: center;
+  padding: 3rem;
+  
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #0056d6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+  
+  .error-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    color: #d32f2f;
+    
+    i {
+      font-size: 1.5rem;
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.document-content {
+  .document-main-header {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    
+    .document-type-badge {
+      display: inline-block;
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 0.25rem 0.75rem;
+      border-radius: 16px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+    
+    .document-title {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #000;
+      margin-bottom: 1.5rem;
+      line-height: 1.3;
+    }
+    
+    .document-meta {
+      .authors {
+        margin-bottom: 1rem;
+        line-height: 1.5;
+      }
+      
+      .publication-info {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        font-size: 0.9rem;
+        color: #666;
+        
+        span {
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+}
+
+.document-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.main-content {
+  .content-section {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+    
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #000;
+      border-bottom: 2px solid #e65c00;
+      padding-bottom: 0.5rem;
+    }
+    
+    .abstract-text {
+      line-height: 1.6;
+      color: #333;
+      font-size: 1rem;
+    }
+    
+    // ========== NUEVOS ESTILOS PARA FULL CONTENT ==========
+    .content-sections-container {
+      .content-section-item {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        
+        // Quitar borde inferior del último elemento
+        &.last-section {
+          margin-bottom: 0;
+          padding-bottom: 0;
+          border-bottom: none;
+        }
+        
+        // Agregar borde entre secciones (excepto la última)
+        &:not(.last-section) {
+          border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .section-title {
+          font-size: 1.3rem;
+          font-weight: 600;
+          margin-bottom: 1rem;
+          color: #2c3e50;
+          display: flex;
+          align-items: flex-start;
+          gap: 0.5rem;
+          line-height: 1.4;
+          
+          .section-number {
+            color: #e65c00;
+            font-weight: 700;
+            min-width: 1.5rem;
+          }
+        }
+        
+        .section-content {
+          .section-text {
+            line-height: 1.7;
+            color: #444;
+            font-size: 1rem;
+            margin-bottom: 0;
+            text-align: justify;
+            
+            // Mejorar la legibilidad del texto
+            &::first-line {
+              font-weight: 500;
+            }
+          }
+        }
+      }
+    }
+    
+    // Estilos para diferentes tipos de secciones
+    .methodology-section {
+      .section-title {
+        color: #2980b9;
+      }
+    }
+    
+    .results-section {
+      .section-title {
+        color: #27ae60;
+      }
+    }
+    
+    .conclusion-section {
+      .section-title {
+        color: #e74c3c;
+      }
+    }
+  }
+}
+
+.sidebar-content {
+  .info-card {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+    
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #000;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 0.5rem;
+    }
+    
+    .keywords-list, .subject-areas-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .keyword-tag, .subject-tag {
+      background: #f8f9fa;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: #495057;
+      border: 1px solid #e9ecef;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: #e9ecef;
+        transform: translateY(-1px);
+      }
+    }
+    
+    .citation-info, .institution-info, .funding-info {
+      p {
+        margin-bottom: 0.75rem;
+        line-height: 1.5;
+        color: #555;
+        
+        strong {
+          color: #333;
+          font-weight: 600;
+        }
+      }
+    }
+    
+    .references-list {
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+      
+      .reference-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+        
+        &:last-child {
+          border-bottom: none;
+        }
+        
+        p {
+          font-size: 0.9rem;
+          line-height: 1.5;
+          color: #666;
+          margin: 0;
+        }
+      }
+      
+      // Scrollbar personalizado
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+        
+        &:hover {
+          background: #a8a8a8;
+        }
+      }
+    }
+  }
+}
+
+.btn-primary {
+  background: #0056d6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+  
+  &:hover {
+    background: #0041a8;
+  }
+}
+
+// Responsive improvements
+@media (max-width: 768px) {
+  .document-container {
+    padding: 1rem;
+  }
+  
+  .document-content .document-main-header {
+    padding: 1.5rem;
+    
+    .document-title {
+      font-size: 1.5rem;
+    }
+  }
+  
+  .main-content .content-section {
+    padding: 1.5rem;
+    
+    .content-sections-container .content-section-item {
+      .section-title {
+        font-size: 1.2rem;
+        flex-direction: column;
+        gap: 0.25rem;
+        
+        .section-number {
+          min-width: auto;
+        }
+      }
+    }
+  }
+}
+
+// Mejoras de accesibilidad
+.section-title {
+  scroll-margin-top: 2rem;
+}
+
+// Efectos de hover suaves
+.content-section-item {
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: translateX(5px);
+  }
+}

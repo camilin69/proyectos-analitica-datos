@@ -1,0 +1,343 @@
+.topbar {
+  position: sticky; // o sticky si quieres que se quede al hacer scroll
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: white;
+}
+
+.topbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px;
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  width: 100%;
+  box-sizing: border-box; 
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+}
+
+.elsevier-logo {
+  width: 54px;
+  height: 48px;
+  display: block;
+}
+
+.logo-text {
+  width: 138px;
+  height: 30px;
+  display: block;
+}
+
+
+object {
+  pointer-events: none;
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  padding-left: 15px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: start;
+  padding-right: 30px;
+}
+
+.topbar-nav {
+  display: flex;
+  align-items: center;
+}
+
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: none;
+  text-decoration: none;
+  font-size: 1.2rem;
+  margin-right: 50px;
+  cursor: pointer;
+  gap: 8px;
+  
+  // En lugar de text-decoration, usar border-bottom
+  border-bottom: 0px solid transparent; // Inicialmente invisible
+  transition: border-bottom 0.1s ease, padding-top 0.2s ease; // Ahora sí es animable
+  
+  &:hover {
+    padding-top: 2px;
+    border-bottom: 2px solid #e65c00;
+    text-decoration: none;
+    
+    .search-icon {
+      filter: brightness(0) saturate(100%) invert(42%) sepia(89%) saturate(1320%) hue-rotate(360deg) brightness(97%) contrast(105%);
+    }
+  }
+}
+
+.search-icon {
+  filter: brightness(0) saturate(100%) invert(24%) sepia(98%) saturate(2158%) hue-rotate(192deg) brightness(95%) contrast(101%);
+  transition: filter 0.3s ease;
+}
+
+.notifications-link{
+  cursor: pointer;
+  margin-right: 2rem;
+  transition: filter 0.2s ease;
+  &:hover {
+    filter: brightness(0) saturate(100%) invert(42%) sepia(89%) saturate(1320%) hue-rotate(360deg) brightness(97%) contrast(105%);
+  }
+}
+
+.info-link, .institution-link {
+  margin-right: 35px;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+  &:hover {
+    filter: brightness(0) saturate(100%) invert(42%) sepia(89%) saturate(1320%) hue-rotate(360deg) brightness(97%) contrast(105%);
+  }
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: #f5f5f5;
+    color: #333;
+  }
+
+  i {
+    font-size: 1.25rem;
+  }
+}
+
+.create-account-btn {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  margin-right: 15px;
+  text-decoration: none;
+  border: 2px solid #0056d6;
+  background-color: white;
+  color: #000;
+  padding: 0.5rem 1rem;
+  border-radius: 0;
+  font-size: 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+
+
+  &:hover {
+    border: 2px solid #e65c00;
+  }
+}
+
+.sign-in-btn {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  text-decoration: none;
+  border: 2px solid #0056d6;
+  background-color: #0056d6;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0;
+  font-size: 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+
+
+  &:hover {
+    border: 2px solid #e65c00;
+    background-color: #fff;
+    color: #000;
+  }
+}
+
+.user-menu {
+  position: relative;
+  margin-left: 0.5rem;
+
+  .user-btn {
+    background: none;
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+    padding: 0.4rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #333;
+
+    &:hover {
+      background: #f8f9fa;
+      border-color: #0077b6;
+    }
+
+    i {
+      font-size: 1.25rem;
+      color: #666;
+
+      &.dropdown-arrow {
+        font-size: 1.1rem;
+      }
+    }
+
+    .user-name {
+      font-weight: 500;
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 150px;
+    margin-top: 0.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+
+    .user-menu:hover & {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+  }
+
+  .dropdown-item {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #333;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: #f8f9fa;
+      color: #0077b6;
+    }
+
+    i {
+      font-size: 1.1rem;
+    }
+  }
+}
+
+.institution-banner {
+  background: #fff;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 2rem;
+
+  .banner-content {
+    max-width: 1400px;
+
+    span {
+      font-size: 1.3rem;
+      color: #666;
+    }
+  }
+}
+
+// Si el topbar tiene banner institucional, ajusta el margen
+.main-content.with-banner {
+  margin-top: 96px; // 64px + altura del banner
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .topbar-container {
+    padding: 0 0.5rem;
+  }
+
+  .topbar-center {
+    margin: 0 1rem;
+    max-width: 300px;
+  }
+
+  .nav-link span,
+  .user-name {
+    display: none;
+  }
+
+  .create-account-btn {
+    padding: 0.5rem;
+    font-size: 0;
+
+    &::before {
+      content: "Create";
+      font-size: 0.9rem;
+    }
+  }
+
+  .institution-banner {
+    padding: 0.5rem;
+    
+    span {
+      font-size: 0.8rem;
+    }
+  }
+
+  .elsevier-logo {
+    width: 28px;
+    height: 28px;
+  }
+
+  .logo-text {
+    height: 16px;
+  }
+
+  .logo-container {
+    gap: 8px;
+  }
+}

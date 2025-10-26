@@ -1,0 +1,23 @@
+@font-face {
+    font-family: 'Scopus';
+    src: url('./fonts/ElsevierSansWeb-Regular.woff2') format('woff2'),
+         url('./fonts/gizmo.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Scopus', sans-serif;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+

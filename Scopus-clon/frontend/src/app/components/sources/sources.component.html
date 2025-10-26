@@ -1,0 +1,206 @@
+<div class="sources-container">
+  <div class="sources-header">
+    <h1>Sources</h1>
+  </div>
+
+  <div class="sources-content">
+    <!-- Sidebar de filtros -->
+    <div class="filters-sidebar">
+      <div class="filter-section">
+        <h3>Filter refine list</h3>
+        <div class="filter-actions">
+          <button class="btn-text">Apps</button>
+          <button class="btn-text" (click)="clearFilters()">Clear filters</button>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <h4>Display options</h4>
+        
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="showOpenAccessOnly" />
+            <span>Display only Open Access Journals</span>
+          </label>
+        </div>
+
+        <div class="filter-info">
+          <span>Counts for 4-year timeframe</span>
+        </div>
+
+        <div class="filter-subsection">
+          <label>No minimum selected</label>
+          <div class="input-group">
+            <input 
+              type="number" 
+              [(ngModel)]="minCitations" 
+              placeholder="Minimum citations"
+              class="filter-input"
+            >
+          </div>
+          <div class="input-group">
+            <input 
+              type="number" 
+              [(ngModel)]="minDocuments" 
+              placeholder="Minimum documents"
+              class="filter-input"
+            >
+          </div>
+        </div>
+
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" />
+            <span>CiteScore highest quartile</span>
+          </label>
+        </div>
+
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="showTop10Percent" />
+            <span>Show only titles in top 10 percent</span>
+          </label>
+        </div>
+
+        <div class="filter-subsection">
+          <label>List quartile</label>
+          <div class="quartile-list">
+            <div 
+              *ngFor="let quartile of quartiles" 
+              class="quartile-item"
+              [class.selected]="selectedQuartiles.includes(quartile)"
+              (click)="toggleQuartile(quartile)"
+            >
+              <div class="quartile-checkbox">
+                <div class="checkmark" *ngIf="selectedQuartiles.includes(quartile)">✓</div>
+              </div>
+              <span>{{ quartile }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="sources-main">
+      <!-- Barra de búsqueda y controles -->
+      <div class="controls-bar">
+        <div class="search-section">
+          <h4>Enter title</h4>
+          <div class="search-input-group">
+            <input
+              type="text"
+              [(ngModel)]="searchQuery"
+              placeholder="Find sources"
+              class="search-input"
+            >
+            <span class="results-count">{{ filteredSources.length }} results</span>
+          </div>
+        </div>
+
+        <div class="actions-section">
+          <div class="view-metrics">
+            <span>View metrics for year:</span>
+            <select [(ngModel)]="selectedYear" class="year-select">
+              <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+            </select>
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn-outline">All</button>
+            <button class="btn-outline" (click)="exportToExcel()">Export to Excel</button>
+            <button class="btn-outline" (click)="saveToSourceList()">Save to source list</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información adicional -->
+      <div class="info-section">
+        <button class="btn-link" (click)="downloadSourceList()">
+          Download Scopus Source List
+        </button>
+        <button class="btn-link">
+          Learn more about Scopus Source List
+        </button>
+      </div>
+
+      <!-- Tabla de resultados -->
+      <div class="sources-table-container">
+        <table class="sources-table">
+          <thead>
+            <tr>
+              <th class="col-rank"></th>
+              <th class="col-title">Title</th>
+              <th class="col-citescore">
+                CiteScore
+                <span class="sort-indicator">↓</span>
+              </th>
+              <th class="col-percentile">Highest percentile</th>
+              <th class="col-citations">
+                Citations
+                <span class="sort-indicator">↓</span>
+              </th>
+              <th class="col-documents">
+                Documents
+                <span class="sort-indicator">↓</span>
+              </th>
+              <th class="col-cited">
+                % Cited
+                <span class="sort-indicator">↓</span>
+              </th>
+              <th class="col-citations-period">2021-24</th>
+              <th class="col-documents-period">2021-24</th>
+              <th class="col-category">Category</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let source of filteredSources" class="source-row">
+              <td class="col-rank">
+                <span class="rank-number">{{ source.rank }}</span>
+              </td>
+              <td class="col-title">
+                <div class="title-content">
+                  <span class="source-title">{{ source.title }}</span>
+                  <span class="quartile-badge" *ngIf="source.quartile">{{ source.quartile }}</span>
+                </div>
+              </td>
+              <td class="col-citescore">
+                <span class="metric-value">{{ source.citeScore }}</span>
+              </td>
+              <td class="col-percentile">
+                <span class="percentile-value">{{ source.highestPercentile }}%</span>
+              </td>
+              <td class="col-citations">
+                <span class="metric-value">{{ source.citations }}</span>
+              </td>
+              <td class="col-documents">
+                <span class="metric-value">{{ source.documents }}</span>
+              </td>
+              <td class="col-cited">
+                <span class="metric-value">{{ source.percentCited }}%</span>
+              </td>
+              <td class="col-citations-period">
+                <span class="period-value">{{ source.citations }}</span>
+              </td>
+              <td class="col-documents-period">
+                <span class="period-value">{{ source.documents }}</span>
+              </td>
+              <td class="col-category">
+                <span class="category-tag">{{ source.category }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Notas al pie -->
+      <div class="table-notes">
+        <p><strong>Notes:</strong></p>
+        <ul>
+          <li>CiteScore 2024 calculated on 05 May, 2025</li>
+          <li>Data subject to change until final release</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

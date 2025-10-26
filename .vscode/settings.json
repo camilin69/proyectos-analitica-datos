@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./Scopus-clon/backend/users"
+    ]
+}

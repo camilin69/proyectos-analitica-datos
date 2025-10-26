@@ -1,0 +1,260 @@
+<!-- results-documents.component.html -->
+<div class="results-container">
+  <!-- Header Actions -->
+  <div class="results-header">
+    <div class="header-actions">
+      <button class="btn-outline" (click)="saveSearch()">
+        <i class="material-icons">bookmark_border</i>
+        <label>Save search</label>
+      </button>
+      <button class="btn-outline" (click)="setSearchAlert()">
+        <i class="material-icons">notifications_none</i>
+        <label>Set search alert</label>
+      </button>
+    </div>
+    <app-search-documents></app-search-documents>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Searching documents...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-state">
+    <div class="error-message">
+      <i class="material-icons">error_outline</i>
+      <span>{{ error }}</span>
+    </div>
+  </div>
+
+  <!-- Results Content -->
+  <div *ngIf="!isLoading && !error" class="results-content">
+    <!-- Toolbar -->
+    <div class="results-toolbar">
+      <div class="toolbar-left">
+        <span class="results-count">
+          Showing {{ (currentPage - 1) * pageSize + 1 }} - 
+          {{ Math.min(currentPage * pageSize, totalResults) }} of {{ totalResults }} Documents
+        </span>
+      </div>
+      <div class="toolbar-right">
+        <select [(ngModel)]="sortBy" (change)="onSortChange()" class="form-select small">
+          <option value="date-newest">Date (newest)</option>
+          <option value="date-oldest">Date (oldest)</option>
+          <option value="citations">Citations</option>
+          <option value="relevance">Relevance</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="results-main-content">
+      <!-- Left Sidebar with Filters -->
+      <div class="left-sidebar">
+        <!-- Filters Sidebar -->
+        <div class="filters-sidebar">
+          <h3 class="filters-title">Filters</h3>
+          
+          <div class="filter-section">
+            <h4>Year</h4>
+            <input 
+              type="text" 
+              [value]="yearFilter"
+              (input)="onYearFilterInput($event)"
+              placeholder="Filter by year..."
+              class="filter-input"
+            >
+          </div>
+
+          <div class="filter-section">
+            <h4>Author name</h4>
+            <input 
+              type="text" 
+              [value]="authorFilter"
+              (input)="onAuthorFilterInput($event)"
+              placeholder="Filter authors..."
+              class="filter-input"
+            >
+          </div>
+
+          <div class="filter-section">
+            <h4>Subject area</h4>
+            <div class="subject-areas">
+              <div 
+                *ngFor="let area of subjectAreas"
+                class="subject-checkbox"
+              >
+                <input 
+                  type="checkbox" 
+                  [id]="'area-' + area"
+                  [checked]="subjectAreaFilter === area"
+                  (change)="onSubjectAreaCheckboxChange($event)"
+                >
+                <label [for]="'area-' + area">{{ area }}</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-section" *ngIf="documentTypes.length > 0">
+            <h4>Document type</h4>
+            <select 
+              [value]="documentTypeFilter" 
+              (change)="onDocumentTypeChange($event)" 
+              class="filter-input"
+            >
+              <option value="">All types</option>
+              <option *ngFor="let type of documentTypes" [value]="type">
+                {{ type }}
+              </option>
+            </select>
+          </div>
+
+          <button *ngIf="yearFilter || authorFilter || subjectAreaFilter || documentTypeFilter" 
+                  class="btn-text clear-filters" 
+                  (click)="clearFilters()">
+            Clear all filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Content with Documents Table -->
+      <div class="right-content">
+        
+        <!-- Documents List -->
+        <div class="documents-list">
+          <!-- Bulk Actions -->
+          <div class="bulk-actions" *ngIf="selectedDocuments.size > 0">
+            <div class="bulk-left">
+              <span>{{ selectedDocuments.size }} selected</span>
+            </div>
+            <div class="bulk-right">
+              <button class="btn-text" (click)="toggleSelectAll({target: {checked: false}})">Clear</button>
+              <button class="btn-text" (click)="exportDocuments()">Export</button>
+              <button class="btn-text" (click)="downloadDocuments()">Download</button>
+              <button class="btn-text" (click)="showCitationOverview()">Citation overview</button>
+              <button class="btn-text">More</button>
+            </div>
+          </div>
+
+          <!-- Documents Table -->
+          <div class="documents-table">
+            <div class="table-header">
+              <div class="col-index">#</div> <!-- Nueva columna para el índice -->
+              <div class="col-checkbox">
+                <input 
+                  type="checkbox" 
+                  [checked]="selectedDocuments.size === filteredDocuments.length && filteredDocuments.length > 0"
+                  (change)="toggleSelectAll($event)"
+                >
+              </div> 
+              <div class="col-title">Document title</div>
+              <div class="col-authors">Authors</div>
+              <div class="col-source">Source</div>
+              <div class="col-year">Year</div>
+              <div class="col-citations">Citations</div>
+              <div class="col-distance">Distance</div>
+            </div>
+
+            <div 
+              *ngFor="let doc of filteredDocuments" 
+              class="table-row"
+              [class.expanded]="showAbstractId === doc.id"
+            >
+              <div class="col-index">{{ doc.index }}</div> <!-- Mostrar índice -->
+              <div class="col-checkbox">
+                <input 
+                  type="checkbox" 
+                  [checked]="doc.selected"
+                  (change)="toggleSelectDocument(doc)"
+                >
+              </div>
+              <div class="col-title">
+                <div class="document-type">Article • {{ doc.document_type }}</div>
+                <div class="document-title" (click)="navigateToDocument(doc.id)">{{ doc.article_title }}</div>
+              </div>
+              <div class="col-authors">
+                <div class="authors-list">
+                  <span *ngFor="let author of doc.authors; let last = last">
+                    {{ author }}{{ !last ? ', ' : '' }}
+                  </span>
+                  <span *ngIf="!doc.authors || doc.authors.length === 0">No authors</span>
+                </div>
+              </div>
+              <div class="col-source">{{ doc.source_title }}</div>
+              <div class="col-year">{{ doc.year }}</div>
+              <div class="col-citations">{{ doc.citations }}</div>
+              <div class="col-distance">{{ doc.distance?.toFixed(4) || 'N/A' }}</div> 
+
+              <!-- Expanded Abstract Section -->
+              <div *ngIf="showAbstractId === doc.id" class="abstract-expansion">
+                <div class="abstract-content">
+                  <h4>Abstract</h4>
+                  <p>{{ doc.abstract || 'No abstract available' }}</p>
+                  
+                  <div class="abstract-details">
+                    <div class="detail-section">
+                      <h5>Author keywords</h5>
+                      <div class="keywords">
+                        <span *ngFor="let keyword of doc.keywords" class="keyword-tag">
+                          {{ keyword }}
+                        </span>
+                        <span *ngIf="!doc.keywords || doc.keywords.length === 0">No keywords</span>
+                      </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                      <h5>Subject area</h5>
+                      <div class="subject-tags">
+                        <span *ngFor="let area of doc.subject_areas" class="subject-tag">
+                          {{ area }}
+                        </span>
+                        <span *ngIf="!doc.subject_areas || doc.subject_areas.length === 0">No subject areas</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination" *ngIf="totalPages > 1">
+            <button 
+              class="pagination-btn" 
+              [disabled]="currentPage === 1"
+              (click)="previousPage()">
+              Previous
+            </button>
+            
+            <div class="pagination-pages">
+              <button 
+                *ngFor="let page of pages"
+                class="pagination-page"
+                [class.active]="page === currentPage"
+                (click)="goToPage(page)">
+                {{ page }}
+              </button>
+            </div>
+            
+            <button 
+              class="pagination-btn" 
+              [disabled]="currentPage === totalPages"
+              (click)="nextPage()">
+              Next
+            </button>
+          </div>
+
+          <!-- Show All Abstracts Toggle -->
+          <div class="show-all-abstracts">
+            <button class="btn-text">
+              <i class="material-icons">unfold_more</i>
+              Show all abstracts
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,72 @@
+<div class="search-form-container">
+  <div class="search-options">
+    <div class="search-within">
+      <div class="select-container">
+        <select [(ngModel)]="searchWithin" class="form-select">
+          <option *ngFor="let option of searchWithinOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+        <label class="floating-label">Search within</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-input-group">
+    <div class="search-field">
+      <div class="input-container">
+        <div class="input-with-clear">
+          <input
+            type="text"
+            id="searchInput"
+            [(ngModel)]="searchTerm"
+            placeholder=" " 
+            class="search-input"
+            (keyup.enter)="onSearch()"
+          >
+          <label class="floating-label">Search documents *</label>
+          <button *ngIf="searchTerm" class="clear-btn" (click)="searchTerm = ''">
+            <i class="material-icons">close</i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="search-actions">
+  <button class="btn-secondary" (click)="addSearchField()">
+    <img [src]="addIconUrl">
+    Add search field
+  </button>
+  <button class="btn-secondary" (click)="addDateRange()">
+    <img [src]="dateIconUrl">
+    Add date range
+  </button>
+  <a href="#" class="advanced-link">Advanced document search <img [src]="greaterThanIconUrl"></a>
+  <div class="distance-input-container">
+    <label for="distanceInput" class="distance-label">Max Distance</label>
+    <input
+      type="number"
+      id="distanceInput"
+      [ngModel]="maxDistance"
+      (ngModelChange)="onMaxDistanceChange($event)"
+      (input)="onMaxDistanceInput($event)"
+      min="0"
+      max="2"
+      step="0.1"
+      class="distance-input"
+      placeholder="1.0"
+    >
+  </div>
+  <div class="form-actions">
+    <button 
+      class="btn-primary" 
+      (click)="onSearch()"
+      [disabled]="!searchTerm.trim()"
+    >
+      Search
+      <img [src]="searchIconUrl">
+    </button>
+  </div>
+</div>

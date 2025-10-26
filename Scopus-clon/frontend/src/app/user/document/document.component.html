@@ -1,0 +1,152 @@
+<!-- src/app/user/document/document.component.html -->
+<div class="document-container">
+  <!-- Header con botón de regreso -->
+  <div class="document-header">
+    <button class="btn-back" (click)="goBack()">
+      <i class="material-icons">arrow_back</i>
+      Back to Search Results
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading document...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-state">
+    <div class="error-message">
+      <i class="material-icons">error_outline</i>
+      <span>{{ error }}</span>
+    </div>
+    <button class="btn-primary" (click)="goBack()">Return to Search</button>
+  </div>
+
+  <!-- Document Content -->
+  <div *ngIf="document && !isLoading" class="document-content">
+    <!-- Document Header -->
+    <header class="document-main-header">
+      <div class="document-type-badge">
+        {{ document.document_type }}
+      </div>
+      <h1 class="document-title">{{ document.article_title }}</h1>
+      
+      <div class="document-meta">
+        <div class="authors">
+          <strong>Authors:</strong>
+          <span *ngFor="let author of document.authors; let last = last">
+            {{ author }}{{ !last ? ', ' : '' }}
+          </span>
+          <span *ngIf="document.authors.length === 0">No authors listed</span>
+        </div>
+        
+        <div class="publication-info">
+          <span><strong>Published:</strong> {{ getFormattedDate(document.publication_date) }}</span>
+          <span><strong>Source:</strong> {{ document.source_title }}</span>
+          <span><strong>Publisher:</strong> {{ document.publisher }}</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <div class="document-grid">
+      <!-- Left Column - Main Content -->
+      <div class="main-content">
+        <!-- Abstract -->
+        <section class="content-section">
+          <h2>Abstract</h2>
+          <p class="abstract-text">{{ document.abstract }}</p>
+        </section>
+
+        <section class="content-section" *ngIf="document?.content?.sections && document.content.sections.length > 0">
+          <h2>Full Content</h2>
+          <div class="content-sections-container">
+            <div *ngFor="let section of document.content.sections; let i = index" 
+                class="content-section-item"
+                [class.first-section]="i === 0"
+                [class.last-section]="i === document.content.sections.length - 1">
+              
+              <!-- Título de la sección -->
+              <h3 class="section-title" *ngIf="section.title">
+                <span class="section-number">{{ i + 1 }}.</span>
+                {{ section.title }}
+              </h3>
+              
+              <!-- Contenido de la sección -->
+              <div class="section-content" *ngIf="section.text">
+                <p class="section-text">{{ section.text }}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right Column - Sidebar Information -->
+      <div class="sidebar-content">
+        <!-- Keywords -->
+        <section class="info-card">
+          <h3>Keywords</h3>
+          <div class="keywords-list">
+            <span *ngFor="let keyword of document.keywords" class="keyword-tag">
+              {{ keyword }}
+            </span>
+            <span *ngIf="document.keywords.length === 0">No keywords</span>
+          </div>
+        </section>
+
+        <!-- Subject Areas -->
+        <section class="info-card">
+          <h3>Subject Areas</h3>
+          <div class="subject-areas-list">
+            <span *ngFor="let area of document.subject_areas" class="subject-tag">
+              {{ area }}
+            </span>
+            <span *ngIf="document.subject_areas.length === 0">No subject areas</span>
+          </div>
+        </section>
+
+        <!-- Citation Information -->
+        <section class="info-card">
+          <h3>Citation Information</h3>
+          <div class="citation-info">
+            <p><strong>Citations:</strong> {{ document.cites_count }}</p>
+            <p><strong>DOI:</strong> {{ document.doi }}</p>
+            <p><strong>ISSN:</strong> {{ document.issn }}</p>
+            <p><strong>Language:</strong> {{ document.language }}</p>
+          </div>
+        </section>
+
+        <!-- Institution -->
+        <section class="info-card" *ngIf="document.institution">
+          <h3>Institution</h3>
+          <div class="institution-info">
+            <p><strong>Name:</strong> {{ document.institution.name }}</p>
+            <p><strong>Location:</strong> {{ document.institution.city }}, {{ document.institution.country }}</p>
+          </div>
+        </section>
+
+        <!-- Funding -->
+        <section class="info-card" *ngIf="document.funding">
+          <h3>Funding Information</h3>
+          <div class="funding-info">
+            <p><strong>Sponsor:</strong> {{ document.funding.sponsor }}</p>
+            <p><strong>Agency:</strong> {{ document.funding.information }}</p>
+            <p><strong>Acronym:</strong> {{ document.funding.acronym }}</p>
+            <p><strong>Grant Number:</strong> {{ document.funding.number }}</p>
+          </div>
+        </section>
+
+        <!-- References -->
+        <section class="info-card" *ngIf="document?.references">
+          <h3>References ({{ document.references.length }})</h3>
+          <div class="references-list">
+            <div *ngFor="let ref of document.references" class="reference-item">
+              <p>{{ ref.reference_text }}</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>

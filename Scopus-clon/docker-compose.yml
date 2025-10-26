@@ -1,0 +1,157 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: scopus-mysql-dev
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_2024
+      MYSQL_DATABASE: scopus_db
+      MYSQL_USER: scopus_user
+      MYSQL_PASSWORD: scopus_password_2024
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data_dev:/var/lib/mysql
+      - ./users_backend/create-tables.sql:/docker-entrypoint-initdb.d/01-create-tables.sql
+      - ./users_backend/insert-data.sql:/docker-entrypoint-initdb.d/02-insert-data.sql
+    networks:
+      - scopus-network-dev
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password_2024"]
+      timeout: 20s
+      retries: 10
+      start_period: 30s
+
+  chromadb:
+    build:
+      context: ./chromadb
+      dockerfile: Dockerfile
+    container_name: scopus-chromadb-dev
+    environment:
+      - CHROMA_SERVER_HOST=0.0.0.0
+      - CHROMA_SERVER_HTTP_PORT=8000
+      - CHROMA_PERSIST_DIRECTORY=/chroma_data
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data_dev:/chroma_data
+      - model_cache_dev:/shared_model_cache  # Cache compartido
+    networks:
+      - scopus-network-dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  users_backend:
+    build: 
+      context: ./users_backend
+      dockerfile: Dockerfile
+    container_name: scopus-users-backend-dev
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - DB_HOST=mysql
+      - DB_USER=scopus_user
+      - DB_PASSWORD=scopus_password_2024
+      - DB_NAME=scopus_db
+      - SECRET_KEY=dev-secret-key-2024
+      - JWT_SECRET_KEY=dev-jwt-secret-key-2024
+      - AES_KEY=dev-32-byte-aes-key-for-encryption!!
+      - CORS_ORIGINS=http://localhost:4200,http://frontend:4200
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./users_backend:/app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - scopus-network-dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  documents_backend:
+    build:
+      context: ./documents_backend
+      dockerfile: Dockerfile
+    container_name: scopus-documents-backend-dev
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - DB_HOST=mysql
+      - DB_USER=scopus_user
+      - DB_PASSWORD=scopus_password_2024
+      - DB_NAME=scopus_db
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - EMBEDDING_MODEL=all-MiniLM-L6-v2
+      - SECRET_KEY=documents-secret-key-2024
+      - CORS_ORIGINS=http://localhost:4200,http://frontend:4200
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./documents_backend:/app
+      - model_cache_dev:/shared_model_cache  # COMPARTIR EL MISMO VOLUMEN
+    depends_on:
+      mysql:
+        condition: service_healthy
+      chromadb:
+        condition: service_healthy
+    networks:
+      - scopus-network-dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: scopus-frontend-dev
+    environment:
+      - NG_APP_USERS_API_URL=http://localhost:5000/api
+      - NG_APP_DOCUMENTS_API_URL=http://localhost:5001/api
+      - NG_APP_ENVIRONMENT=development
+      - NG_APP_ENABLE_DEBUG=true
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/angular.json:/app/angular.json
+      - ./frontend/package.json:/app/package.json
+    depends_on:
+      users_backend:
+        condition: service_healthy
+      documents_backend:
+        condition: service_healthy
+    networks:
+      - scopus-network-dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "const http = require('http'); http.get('http://localhost:4200', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  mysql_data_dev:
+  chroma_data_dev:
+  model_cache_dev:  # VOLUMEN COMPARTIDO PARA EL MODELO
+
+networks:
+  scopus-network-dev:
+    driver: bridge

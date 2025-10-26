@@ -1,0 +1,20 @@
+.app-container {
+  display: grid;
+  grid-template-rows: auto 1fr auto; /* topbar - contenido - footer */
+  min-height: 100vh;
+}
+
+app-topbar {
+  grid-row: 1;
+}
+
+.main-content {
+  grid-row: 2;
+  background-color: #f5f5f5;
+  color: #323232;
+  overflow-y: auto; /* Scroll si el contenido es muy largo */
+}
+
+app-footer {
+  grid-row: 3;
+}

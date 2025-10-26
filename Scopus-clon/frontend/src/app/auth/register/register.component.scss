@@ -1,0 +1,170 @@
+.register-container {
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.register-header {
+  padding: 2rem;
+  text-align: center;
+
+  .scopus-logo {
+    h1 {
+      font-size: 2rem;
+      font-weight: 300;
+      color: #0077b6;
+      margin: 0;
+      letter-spacing: -1px;
+    }
+  }
+}
+
+.register-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.register-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  padding: 2rem 2rem 1rem 2rem;
+  text-align: center;
+
+  h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #333;
+  }
+
+  .welcome-text {
+    margin: 0 0 1rem 0;
+    color: #666;
+    font-size: 1rem;
+    line-height: 1.4;
+
+    strong {
+      color: #333;
+      font-weight: 600;
+    }
+  }
+
+  .info-text {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+}
+
+.card-body {
+  padding: 1rem 2rem 2rem 2rem;
+
+  .form-group {
+    margin-bottom: 1.5rem;
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #333;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #0077b6;
+    box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.1);
+  }
+
+  &.invalid {
+    border-color: #dc3545;
+  }
+}
+
+.validation-error {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.btn-primary {
+  width: 100%;
+  background: #0077b6;
+  color: white;
+  border: none;
+  padding: 0.875rem 1rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: #0056a3;
+  }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.register-footer {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+
+  p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+
+    a {
+      color: #0077b6;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
