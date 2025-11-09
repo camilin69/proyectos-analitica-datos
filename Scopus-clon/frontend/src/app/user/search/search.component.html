@@ -23,33 +23,22 @@
     <app-search-documents *ngSwitchCase="'documents'"></app-search-documents>
     
     <!-- Authors Search -->
-    <app-search-authors *ngSwitchCase="'authors'"></app-search-authors>
+    <div *ngSwitchCase="'authors'">
+      <h2>Author Search Coming Soon!</h2>
+    </div>
     
     <!-- Organizations Search -->
-    <app-search-organizations *ngSwitchCase="'organizations'"></app-search-organizations>
+    <div *ngSwitchCase="'organizations'">
+      <h2>Organization Search Coming Soon!</h2>
+    </div>
     
     <!-- Researcher Discovery Search -->
-    <app-search-researcher-discovery *ngSwitchCase="'researcher-discovery'"></app-search-researcher-discovery>
+    <div *ngSwitchCase="'researcher-discovery'">
+      <h2>Researcher Discovery Search Coming Soon!</h2>
+    </div>
     
     <!-- Default (Documents) -->
     <app-search-documents *ngSwitchDefault></app-search-documents>
     
-  </div>
-
-  <!-- Search History -->
-  <div class="search-sidebar">
-    <div class="sidebar-section">
-      <h3>Search History</h3>
-      <div class="empty-state">
-        Start searching and your history will appear here.
-      </div>
-    </div>
-
-    <div class="sidebar-section">
-      <h3>Saved Searches</h3>
-      <div class="empty-state">
-        If you need help to start searching, see our search tips.
-      </div>
-    </div>
   </div>
 </div>

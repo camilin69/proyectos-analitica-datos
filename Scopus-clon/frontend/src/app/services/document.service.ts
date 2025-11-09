@@ -1,7 +1,7 @@
 // document.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin, map } from 'rxjs';
 import { environment } from '../../enviroments/enviroment';
 
 export interface Document {
@@ -33,16 +33,24 @@ export interface Document {
   documentTitle?: string;
   authorKeywords?: string[];
   subjectAreas?: string[];
+  
+  // Nuevos campos para comparación
+  search_time?: number;
+  search_config?: string;
+  search_engine?: string;
 }
 
 export interface DocumentSearchResponse {
   query: string;
   search_type: string;
-  max_distance: number;
+  max_distance?: number;
   total_results: number;
   offset: number;
   limit: number;
   results: Document[];
+  search_time?: number;
+  search_config?: string;
+  search_engine?: string;
 }
 
 export interface DocumentDetails {
@@ -85,17 +93,62 @@ export interface DocumentDetails {
   publisher?: string;
 }
 
+export interface SearchComparisonResult {
+  engine: string;
+  config?: string;
+  results: Document[];
+  total_results: number;
+  search_time: number;
+  query: string;
+  search_within: string;
+  max_distance?: number;
+}
+
+export interface HNSWConfig {
+  name: string;
+  description: string;
+  params: any;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class DocumentService {
   private apiUrl = environment.documentsApiUrl;
+  private usersApiUrl = environment.usersApiUrl;
   
   // Sistema de caché
   private cachedDocuments: Document[] = [];
   private cachedDocumentDetails: Map<number, DocumentDetails> = new Map();
+  private searchWithin: string = '';
   private lastSearchQuery: string = '';
   private lastMaxDistance: number = 0.1;
+  private lastSearchEngine: string = 'chromadb';
+  private lastHNSWConfig: string = 'balanced';
+
+  // Configuraciones HNSW disponibles
+  hnswConfigs: HNSWConfig[] = [
+    {
+      name: 'default',
+      description: 'Configuración por defecto',
+      params: { hnsw_space: 'cosine', hnsw_construction_ef: 100, hnsw_search_ef: 100, hnsw_M: 16 }
+    },
+    {
+      name: 'high_precision',
+      description: 'Alta precisión, mayor tiempo',
+      params: { hnsw_space: 'cosine', hnsw_construction_ef: 200, hnsw_search_ef: 200, hnsw_M: 32 }
+    },
+    {
+      name: 'fast_search',
+      description: 'Búsqueda rápida, menor precisión',
+      params: { hnsw_space: 'cosine', hnsw_construction_ef: 50, hnsw_search_ef: 50, hnsw_M: 8 }
+    },
+    {
+      name: 'balanced',
+      description: 'Balance precisión/velocidad',
+      params: { hnsw_space: 'cosine', hnsw_construction_ef: 150, hnsw_search_ef: 100, hnsw_M: 16 }
+    }
+  ];
 
   // Claves para localStorage
   private readonly CACHED_DOCS_KEY = 'cached_documents';
@@ -103,7 +156,6 @@ export class DocumentService {
   private readonly LAST_SEARCH_KEY = 'last_search_params';
 
   constructor(private http: HttpClient) {
-    // Cargar datos del localStorage al inicializar
     this.loadFromLocalStorage();
   }
 
@@ -111,48 +163,44 @@ export class DocumentService {
 
   private loadFromLocalStorage(): void {
     try {
-      // Cargar documentos cacheados
       const cachedDocs = localStorage.getItem(this.CACHED_DOCS_KEY);
       if (cachedDocs) {
         this.cachedDocuments = JSON.parse(cachedDocs);
-        console.log(`📁 Cargados ${this.cachedDocuments.length} documentos desde localStorage`);
       }
 
-      // Cargar detalles de documentos
       const cachedDetails = localStorage.getItem(this.CACHED_DETAILS_KEY);
       if (cachedDetails) {
         const detailsArray = JSON.parse(cachedDetails);
         this.cachedDocumentDetails = new Map(detailsArray);
-        console.log(`📁 Cargados ${this.cachedDocumentDetails.size} detalles de documentos desde localStorage`);
       }
 
-      // Cargar última búsqueda
       const lastSearch = localStorage.getItem(this.LAST_SEARCH_KEY);
       if (lastSearch) {
         const searchParams = JSON.parse(lastSearch);
         this.lastSearchQuery = searchParams.query;
         this.lastMaxDistance = searchParams.maxDistance;
-        console.log(`📁 Cargada última búsqueda: "${this.lastSearchQuery}" desde localStorage`);
+        this.searchWithin = searchParams.searchWithin;
+        this.lastSearchEngine = searchParams.searchEngine || 'chromadb';
+        this.lastHNSWConfig = searchParams.hnswConfig || 'balanced';
       }
     } catch (error) {
       console.error('❌ Error cargando datos desde localStorage:', error);
-      this.clearLocalStorage();
     }
   }
 
   private saveToLocalStorage(): void {
     try {
-      // Guardar documentos cacheados
       localStorage.setItem(this.CACHED_DOCS_KEY, JSON.stringify(this.cachedDocuments));
       
-      // Guardar detalles de documentos (convertir Map a Array)
       const detailsArray = Array.from(this.cachedDocumentDetails.entries());
       localStorage.setItem(this.CACHED_DETAILS_KEY, JSON.stringify(detailsArray));
       
-      // Guardar última búsqueda
       const searchParams = {
         query: this.lastSearchQuery,
-        maxDistance: this.lastMaxDistance
+        searchWithin: this.searchWithin,
+        maxDistance: this.lastMaxDistance,
+        searchEngine: this.lastSearchEngine,
+        hnswConfig: this.lastHNSWConfig
       };
       localStorage.setItem(this.LAST_SEARCH_KEY, JSON.stringify(searchParams));
     } catch (error) {
@@ -160,29 +208,123 @@ export class DocumentService {
     }
   }
 
-  private clearLocalStorage(): void {
-    localStorage.removeItem(this.CACHED_DOCS_KEY);
-    localStorage.removeItem(this.CACHED_DETAILS_KEY);
-    localStorage.removeItem(this.LAST_SEARCH_KEY);
-  }
-
-  // ========== MÉTODOS DE BÚSQUEDA (sin cambios) ==========
+  // ========== MÉTODOS DE BÚSQUEDA MEJORADOS ==========
 
   searchDocuments(
     query: string, 
-    searchType: 'semantic' | 'keyword' = 'semantic',
+    searchType: 'semantic' | 'traditional' = 'semantic',
+    searchWithin: string,
+    limit: number = 10,
+    offset: number = 0,
+    maxDistance: number = 0.1,
+    searchEngine: string = 'chromadb',
+    hnswConfig: string = 'balanced'
+  ): Observable<DocumentSearchResponse> {
+    
+    if (searchEngine === 'mysql') {
+      // Búsqueda en MySQL (base de datos tradicional)
+      let params = new HttpParams()
+        .set('q', query)
+        .set('searchWithin', searchWithin)
+        .set('limit', limit.toString())
+        .set('offset', offset.toString());
+
+      return this.http.get<DocumentSearchResponse>(`${this.usersApiUrl}/documents/search`, { params });
+    } else {
+      // Búsqueda en ChromaDB (vectorial)
+      let params = new HttpParams()
+        .set('q', query)
+        .set('type', searchType)
+        .set('searchWithin', searchWithin)
+        .set('limit', limit.toString())
+        .set('offset', offset.toString())
+        .set('max_distance', maxDistance.toString())
+        .set('hnsw_config', hnswConfig);
+
+      return this.http.get<DocumentSearchResponse>(`${this.apiUrl}/search`, { params });
+    }
+  }
+
+  searchWithHNSWComparison(
+    query: string,
+    searchWithin: string,
     limit: number = 10,
     offset: number = 0,
     maxDistance: number = 0.1
-  ): Observable<DocumentSearchResponse> {
+  ): Observable<SearchComparisonResult[]> {
+    
     let params = new HttpParams()
       .set('q', query)
-      .set('type', searchType)
+      .set('searchWithin', searchWithin)
       .set('limit', limit.toString())
-      .set('offset', offset.toString())
-      .set('max_distance', maxDistance.toString()); 
+      .set('max_distance', maxDistance.toString());
 
-    return this.http.get<DocumentSearchResponse>(`${this.apiUrl}/search`, { params });
+    return this.http.get<any>(`${this.apiUrl}/search/compare-hnsw`, { params }).pipe(
+      map(response => {
+        const comparisonResults: SearchComparisonResult[] = [];
+        
+        for (const [configName, configData] of Object.entries(response.comparison)) {
+          const data = configData as any;
+          comparisonResults.push({
+            engine: 'chromadb',
+            config: configName,
+            results: data.results || [],
+            total_results: data.total_results || 0,
+            search_time: data.search_time || 0, // Tiempo exacto
+            query: response.query,
+            search_within: response.search_within,
+            max_distance: response.max_distance
+          } as SearchComparisonResult);
+        }
+        
+        return comparisonResults;
+      })
+    );
+  }
+
+  /**
+   * Realizar búsqueda comparativa entre MySQL y ChromaDB
+   */
+  searchWithEngineComparison(
+    query: string,
+    searchWithin: string,
+    limit: number = 10,
+    offset: number = 0,
+    maxDistance: number = 0.1,
+    hnswConfig: string = 'balanced'
+  ): Observable<SearchComparisonResult[]> {
+    
+    const mysqlSearch = this.searchDocuments(
+      query, 'traditional', searchWithin, limit, offset, maxDistance, 'mysql'
+    ).pipe(
+      map(response => ({
+        engine: 'mysql',
+        config: 'traditional',
+        results: response.results,
+        total_results: response.total_results,
+        search_time: response.search_time || 0,
+        query: response.query,
+        search_within: searchWithin,
+        max_distance: maxDistance
+      } as SearchComparisonResult))
+    );
+
+    const chromaDBSearch = this.searchDocuments(
+      query, 'semantic', searchWithin, limit, offset, maxDistance, 'chromadb', hnswConfig
+    ).pipe(
+      map(response => ({
+        engine: 'chromadb',
+        config: hnswConfig,
+        results: response.results,
+        total_results: response.total_results,
+        search_time: response.search_time || 0,
+        query: response.query,
+        search_within: searchWithin,
+        max_distance: maxDistance
+      } as SearchComparisonResult))
+    );
+
+    return forkJoin([mysqlSearch, chromaDBSearch]);
   }
 
   getDocumentById(id: number): Observable<DocumentDetails> {
@@ -193,8 +335,7 @@ export class DocumentService {
 
   setCachedDocuments(documents: Document[]): void {
     this.cachedDocuments = documents;
-    this.saveToLocalStorage(); // Guardar automáticamente
-    console.log(`💾 Cached ${documents.length} documents y guardado en localStorage`);
+    this.saveToLocalStorage();
   }
 
   getCachedDocuments(): Document[] {
@@ -207,44 +348,55 @@ export class DocumentService {
 
   setCachedDocumentDetails(id: number, documentDetails: DocumentDetails): void {
     this.cachedDocumentDetails.set(id, documentDetails);
-    this.saveToLocalStorage(); // Guardar automáticamente
-    console.log(`💾 Cached details for document ${id} y guardado en localStorage`);
+    this.saveToLocalStorage();
   }
 
   getCachedDocumentDetails(id: number): DocumentDetails | null {
     return this.cachedDocumentDetails.get(id) || null;
   }
 
-  setLastSearchParams(query: string, maxDistance: number): void {
+  setLastSearchParams(
+    query: string, 
+    searchWithin: string, 
+    maxDistance: number,
+    searchEngine: string = 'chromadb',
+    hnswConfig: string = 'balanced'
+  ): void {
     this.lastSearchQuery = query;
     this.lastMaxDistance = maxDistance;
-    this.saveToLocalStorage(); // Guardar automáticamente
-    console.log(`💾 Saved search params: "${query}", ${maxDistance} en localStorage`);
+    this.searchWithin = searchWithin;
+    this.lastSearchEngine = searchEngine;
+    this.lastHNSWConfig = hnswConfig;
+    this.saveToLocalStorage();
   }
 
-  getLastSearchParams(): { query: string; maxDistance: number } {
+  getLastSearchParams(): { 
+    query: string; 
+    searchWithin: string; 
+    maxDistance: number;
+    searchEngine: string;
+    hnswConfig: string;
+  } {
     return {
       query: this.lastSearchQuery,
-      maxDistance: this.lastMaxDistance
+      searchWithin: this.searchWithin,
+      maxDistance: this.lastMaxDistance,
+      searchEngine: this.lastSearchEngine,
+      hnswConfig: this.lastHNSWConfig
     };
   }
 
-  // Método para obtener un documento desde cualquier fuente (cache, localStorage, o API)
   getDocument(id: number): Observable<DocumentDetails> {
-    // Primero verificar en caché de detalles
     const cachedDetails = this.getCachedDocumentDetails(id);
     if (cachedDetails) {
-      console.log(`📄 Documento ${id} encontrado en caché de detalles`);
       return new Observable(observer => {
         observer.next(cachedDetails);
         observer.complete();
       });
     }
 
-    // Luego verificar en caché de documentos básicos
     const cachedDocument = this.getCachedDocumentById(id);
     if (cachedDocument) {
-      console.log(`📄 Documento ${id} encontrado en caché básico, mapeando a detalles`);
       const documentDetails = this.mapToDocumentDetails(cachedDocument);
       this.setCachedDocumentDetails(id, documentDetails);
       return new Observable(observer => {
@@ -253,8 +405,6 @@ export class DocumentService {
       });
     }
 
-    // Finalmente, cargar desde API
-    console.log(`📄 Documento ${id} no encontrado en caché, cargando desde API`);
     return this.getDocumentById(id);
   }
 
@@ -281,13 +431,24 @@ export class DocumentService {
     };
   }
 
-  // Limpiar caché (opcional)
   clearAllCache(): void {
     this.cachedDocuments = [];
     this.cachedDocumentDetails.clear();
     this.lastSearchQuery = '';
     this.lastMaxDistance = 0.1;
-    this.clearLocalStorage();
-    console.log('🧹 Todo el caché limpiado');
+    this.lastSearchEngine = 'chromadb';
+    this.lastHNSWConfig = 'balanced';
+    localStorage.removeItem(this.CACHED_DOCS_KEY);
+    localStorage.removeItem(this.CACHED_DETAILS_KEY);
+    localStorage.removeItem(this.LAST_SEARCH_KEY);
+  }
+
+  // Métodos para obtener configuraciones
+  getHNSWConfigs(): HNSWConfig[] {
+    return this.hnswConfigs;
+  }
+
+  getSearchEngines(): string[] {
+    return ['chromadb', 'mysql'];
   }
 }

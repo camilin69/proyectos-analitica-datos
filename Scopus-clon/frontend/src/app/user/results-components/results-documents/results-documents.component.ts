@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
-import { DocumentService, Document, DocumentSearchResponse } from '../../../services/document.service';
+import { DocumentService, Document, DocumentSearchResponse, SearchComparisonResult, HNSWConfig } from '../../../services/document.service';
 import { SearchDocumentsComponent } from '../../search-components/search-documents/search-documents.component';
 
 interface ResultsDocument extends Document {
@@ -23,6 +23,7 @@ interface ResultsDocument extends Document {
 })
 export class ResultsDocumentsComponent implements OnInit, OnDestroy {
   searchQuery: string = '';
+  searchWithin: string = 'title-abstract-keywords';
   maxDistance: number = 0.3;
   documents: ResultsDocument[] = [];
   filteredDocuments: ResultsDocument[] = [];
@@ -30,6 +31,23 @@ export class ResultsDocumentsComponent implements OnInit, OnDestroy {
   showAbstractId: number | null = null;
   sortBy: string = 'relevance';
   Math = Math;
+
+  // Nuevas propiedades para comparación
+  searchEngine: string = 'chromadb';
+  hnswConfig: string = 'balanced';
+  searchTime: number = 0;
+  comparisonResults: SearchComparisonResult[] = [];
+  showComparison: boolean = false;
+
+  lastSearchEngine: string = 'chromadb';
+  lastHNSWConfig: string = 'balanced';
+  engineTimes: Map<string, number> = new Map();
+  hnswTimes: Map<string, number> = new Map();
+  
+  // Configuraciones disponibles
+  searchEngines: string[] = [];
+  hnswConfigs: HNSWConfig[] = [];
+  
   // Estado de carga y errores
   isLoading: boolean = false;
   error: string = '';
@@ -64,7 +82,10 @@ export class ResultsDocumentsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private documentService: DocumentService
-  ) {}
+  ) {
+    this.searchEngines = this.documentService.getSearchEngines();
+    this.hnswConfigs = this.documentService.getHNSWConfigs();
+  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -76,13 +97,17 @@ export class ResultsDocumentsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(params => {
         this.searchQuery = params['q'] || '';
+        this.searchWithin = params['searchWithin'] || 'title and abstract and keywords';
         this.maxDistance = params['max_distance'] ? parseFloat(params['max_distance']) : 0.3;
         
+        // Cargar parámetros guardados
+        const lastParams = this.documentService.getLastSearchParams();
+        this.searchEngine = lastParams.searchEngine;
+        this.hnswConfig = lastParams.hnswConfig;
+        
         console.log('Search query received:', this.searchQuery);
-        console.log('Max distance received:', this.maxDistance);
         
         if (this.searchQuery) {
-          // Reiniciar paginación cuando cambia la búsqueda
           this.currentPage = 1;
           this.documents = [];
           this.filteredDocuments = [];
@@ -92,13 +117,183 @@ export class ResultsDocumentsComponent implements OnInit, OnDestroy {
     this.setupFilterDebouncing();
   }
 
+  onSearchEngineChange() {
+    console.log('Search engine changed to:', this.searchEngine);
+    if (this.searchQuery) {
+      this.performSearch();
+    }
+  }
+
+  onHNSWConfigChange() {
+    console.log('HNSW config changed to:', this.hnswConfig);
+    if (this.searchQuery && this.searchEngine === 'chromadb') {
+      this.performSearch();
+    }
+  }
+
+  performSearch() {
+    if (!this.searchQuery.trim()) {
+      this.error = 'Please enter a search query';
+      return;
+    }
+
+    this.isLoading = true;
+    this.error = '';
+    this.searchTime = 0;
+    this.comparisonResults = [];
+    this.showComparison = false;
+
+    console.log('Performing search:', {
+      query: this.searchQuery,
+      engine: this.searchEngine,
+      config: this.hnswConfig,
+      maxDistance: this.maxDistance,
+      within: this.searchWithin
+    });
+
+    // Guardar parámetros de búsqueda
+    this.documentService.setLastSearchParams(
+      this.searchQuery, 
+      this.searchWithin, 
+      this.maxDistance,
+      this.searchEngine,
+      this.hnswConfig
+    );
+
+    const offset = (this.currentPage - 1) * this.pageSize;
+
+    this.documentService.searchDocuments(
+      this.searchQuery, 
+      'semantic', 
+      this.searchWithin,
+      this.pageSize, 
+      offset, 
+      this.maxDistance,
+      this.searchEngine,
+      this.hnswConfig
+    )
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: DocumentSearchResponse) => {
+          console.log('Search response received:', response);
+          
+          // Guardar tiempo de búsqueda EXACTO
+          this.searchTime = response.search_time || 0;
+          
+          // Actualizar tiempos guardados
+          this.engineTimes.set(this.searchEngine, this.searchTime);
+          if (this.searchEngine === 'chromadb') {
+            this.hnswTimes.set(this.hnswConfig, this.searchTime);
+          }
+          
+          // Actualizar últimos parámetros
+          this.lastSearchEngine = this.searchEngine;
+          this.lastHNSWConfig = this.hnswConfig;
+          
+          // Guardar documentos en caché
+          this.documentService.setCachedDocuments(response.results);
+          
+          // Procesar documentos con índices
+          this.documents = response.results.map((doc, index) => ({
+            ...this.mapToResultsDocument(doc),
+            index: offset + index + 1,
+            search_engine: this.searchEngine,
+            search_config: this.hnswConfig,
+            search_time: this.searchTime // Tiempo exacto
+          }));
+          
+          this.filteredDocuments = [...this.documents];
+          this.totalResults = response.total_results;
+          
+          // Configurar paginación
+          this.totalPages = Math.ceil(response.total_results / this.pageSize);
+          this.generatePageNumbers();
+          
+          console.log(`📊 Búsqueda completada: ${this.documents.length} documentos, tiempo: ${this.searchTime.toFixed(6)}s`);
+          
+          this.updateAvailableFilters();
+          this.applyFilters();
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading documents:', error);
+          this.error = 'Failed to load search results. Please try again.';
+          this.isLoading = false;
+        }
+      });
+      this.scrollToTop();
+  }
+
+  performComparisonSearch() {
+    if (!this.searchQuery.trim()) return;
+
+    this.isLoading = true;
+    this.showComparison = true;
+    this.comparisonResults = [];
+
+    const offset = (this.currentPage - 1) * this.pageSize;
+
+    if (this.searchEngine === 'chromadb') {
+      // Comparar configuraciones HNSW usando el nuevo endpoint
+      this.documentService.searchWithHNSWComparison(
+        this.searchQuery,
+        this.searchWithin,
+        this.pageSize,
+        offset,
+        this.maxDistance
+      ).subscribe({
+        next: (results: SearchComparisonResult[]) => {
+          this.comparisonResults = results;
+          this.isLoading = false;
+          console.log('HNSW comparison completed:', results);
+          
+          // Actualizar tiempos guardados
+          results.forEach(result => {
+            if (result.engine === 'chromadb' && result.config) {
+              this.hnswTimes.set(result.config, result.search_time);
+            }
+          });
+        },
+        error: (error) => {
+          console.error('Error in HNSW comparison:', error);
+          this.isLoading = false;
+        }
+      });
+    } else {
+      // Comparar motores de búsqueda
+      this.documentService.searchWithEngineComparison(
+        this.searchQuery,
+        this.searchWithin,
+        this.pageSize,
+        offset,
+        this.maxDistance,
+        this.hnswConfig
+      ).subscribe({
+        next: (results: SearchComparisonResult[]) => {
+          this.comparisonResults = results;
+          this.isLoading = false;
+          console.log('Engine comparison completed:', results);
+          
+          // Actualizar tiempos guardados
+          results.forEach(result => {
+            this.engineTimes.set(result.engine, result.search_time);
+          });
+        },
+        error: (error) => {
+          console.error('Error in engine comparison:', error);
+          this.isLoading = false;
+        }
+      });
+    }
+  }
+
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages || page === this.currentPage) {
       return;
     }
     
     this.currentPage = page;
-    this.scrollToTop(); // ← Agregar esta línea
+    this.scrollToTop();
     this.performSearch();
   }
 
@@ -139,64 +334,7 @@ export class ResultsDocumentsComponent implements OnInit, OnDestroy {
     }
   }
 
-  performSearch() {
-    if (!this.searchQuery.trim()) {
-      this.error = 'Please enter a search query';
-      return;
-    }
-
-    this.isLoading = true;
-    this.error = '';
-    console.log('Performing search for:', this.searchQuery, 'with max Distance:', this.maxDistance);
-
-    // Guardar parámetros de búsqueda
-    this.documentService.setLastSearchParams(this.searchQuery, this.maxDistance);
-
-    // Calcular offset para la paginación
-    const offset = (this.currentPage - 1) * this.pageSize;
-
-    this.documentService.searchDocuments(
-      this.searchQuery, 
-      'semantic', 
-      this.pageSize, 
-      offset, 
-      this.maxDistance
-    )
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: DocumentSearchResponse) => {
-          console.log('Search response received:', response);
-          
-          // Guardar documentos en caché
-          this.documentService.setCachedDocuments(response.results);
-          
-          // Procesar documentos con índices
-          this.documents = response.results.map((doc, index) => ({
-            ...this.mapToResultsDocument(doc),
-            index: offset + index + 1 // ← Agregar índice calculado
-          }));
-          
-          this.filteredDocuments = [...this.documents];
-          this.totalResults = response.total_results;
-          
-          // Configurar paginación
-          this.totalPages = Math.ceil(response.total_results / this.pageSize);
-          this.generatePageNumbers();
-          
-          console.log(`📊 Búsqueda completada: ${this.documents.length} documentos cargados, ${this.totalResults} totales, Páginas: ${this.totalPages}`);
-          
-          this.updateAvailableFilters();
-          this.applyFilters();
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error loading documents:', error);
-          this.error = 'Failed to load search results. Please try again.';
-          this.isLoading = false;
-        }
-      });
-      this.scrollToTop();
-  }
+  
 
   private mapToResultsDocument(doc: Document): ResultsDocument {
     return {
@@ -300,6 +438,7 @@ export class ResultsDocumentsComponent implements OnInit, OnDestroy {
     this.router.navigate(['/document', documentId], {
       queryParams: {
         q: this.searchQuery,
+        search_within: this.searchWithin,
         max_distance: this.maxDistance
       }
     });
@@ -359,6 +498,8 @@ export class ResultsDocumentsComponent implements OnInit, OnDestroy {
   saveSearch() {
     const searchData = {
       query: this.searchQuery,
+      search_within: this.searchWithin,
+      max_distance: this.maxDistance,
       filters: {
         year: this.yearFilter,
         author: this.authorFilter,

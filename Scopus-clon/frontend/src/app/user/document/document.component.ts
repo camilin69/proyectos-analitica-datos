@@ -154,12 +154,14 @@ export class DocumentComponent implements OnInit {
   goBack() {
     // Usar los parámetros de búsqueda guardados si no hay en la URL
     const searchQuery = this.searchQuery || this.documentService.getLastSearchParams().query;
+    const searchWithin = this.documentService.getLastSearchParams().searchWithin;
     const maxDistance = this.maxDistance || this.documentService.getLastSearchParams().maxDistance;
 
     if (searchQuery) {
       this.router.navigate(['/results-documents'], {
         queryParams: {
           q: searchQuery,
+          search_within: searchWithin,
           max_distance: maxDistance
         }
       });

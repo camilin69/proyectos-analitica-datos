@@ -3,7 +3,7 @@
     <div class="search-within">
       <div class="select-container">
         <select [(ngModel)]="searchWithin" class="form-select">
-          <option *ngFor="let option of searchWithinOptions" [value]="option.value">
+          <option *ngFor="let option of searchWithinOptions" [ngValue]="option.value">
             {{ option.label }}
           </option>
         </select>

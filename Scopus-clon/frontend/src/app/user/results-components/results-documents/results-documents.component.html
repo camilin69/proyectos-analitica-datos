@@ -3,14 +3,54 @@
   <!-- Header Actions -->
   <div class="results-header">
     <div class="header-actions">
-      <button class="btn-outline" (click)="saveSearch()">
-        <i class="material-icons">bookmark_border</i>
-        <label>Save search</label>
-      </button>
-      <button class="btn-outline" (click)="setSearchAlert()">
-        <i class="material-icons">notifications_none</i>
-        <label>Set search alert</label>
-      </button>
+      <!-- Controles de búsqueda reorganizados -->
+      <div class="search-controls">
+        <!-- Selector de motor de búsqueda -->
+        <div class="control-group">
+          <label>Search Engine:</label>
+          <select [(ngModel)]="searchEngine" (change)="onSearchEngineChange()" class="form-select">
+            <option *ngFor="let engine of searchEngines" [value]="engine">
+              {{ engine === 'chromadb' ? 'ChromaDB (Vector)' : 'MySQL (Traditional)' }}
+            </option>
+          </select>
+          <!-- Tiempo del motor actual -->
+          <div *ngIf="searchTime > 0 && searchEngine === lastSearchEngine" class="time-badge">
+            {{ searchTime.toFixed(6) }}s
+          </div>
+        </div>
+
+        <!-- Selector de configuración HNSW (solo para ChromaDB) -->
+        <div *ngIf="searchEngine === 'chromadb'" class="control-group">
+          <label>HNSW Config:</label>
+          <select [(ngModel)]="hnswConfig" (change)="onHNSWConfigChange()" class="form-select">
+            <option *ngFor="let config of hnswConfigs" [value]="config.name">
+              {{ config.description }}
+            </option>
+          </select>
+          <!-- Tiempo de la configuración actual -->
+          <div *ngIf="searchTime > 0 && searchEngine === 'chromadb' && hnswConfig === lastHNSWConfig" class="time-badge">
+            {{ searchTime.toFixed(6) }}s
+          </div>
+        </div>
+
+        <!-- Botón de comparación -->
+        <button class="btn-outline compare-btn" (click)="performComparisonSearch()" [disabled]="!searchQuery.trim()">
+          <i class="material-icons">compare</i>
+          <label>Compare Search</label>
+        </button>
+      </div>
+
+      <!-- Botones adicionales -->
+      <div class="additional-actions">
+        <button class="btn-outline" (click)="saveSearch()">
+          <i class="material-icons">bookmark_border</i>
+          <label>Save search</label>
+        </button>
+        <button class="btn-outline" (click)="setSearchAlert()">
+          <i class="material-icons">notifications_none</i>
+          <label>Set search alert</label>
+        </button>
+      </div>
     </div>
     <app-search-documents></app-search-documents>
   </div>
@@ -31,21 +71,62 @@
 
   <!-- Results Content -->
   <div *ngIf="!isLoading && !error" class="results-content">
-    <!-- Toolbar -->
+    <!-- Toolbar Mejorado -->
     <div class="results-toolbar">
       <div class="toolbar-left">
         <span class="results-count">
           Showing {{ (currentPage - 1) * pageSize + 1 }} - 
           {{ Math.min(currentPage * pageSize, totalResults) }} of {{ totalResults }} Documents
         </span>
+        <!-- Tiempo de búsqueda actual -->
+        <span *ngIf="searchTime > 0" class="search-time">
+          Current search: {{ searchTime.toFixed(6) }}s
+          <span *ngIf="searchEngine === 'chromadb'">({{ hnswConfig }})</span>
+          <span *ngIf="searchEngine === 'mysql'">(MySQL)</span>
+        </span>
       </div>
       <div class="toolbar-right">
+        <!-- Ordenamiento -->
         <select [(ngModel)]="sortBy" (change)="onSortChange()" class="form-select small">
           <option value="date-newest">Date (newest)</option>
           <option value="date-oldest">Date (oldest)</option>
           <option value="citations">Citations</option>
           <option value="relevance">Relevance</option>
         </select>
+      </div>
+    </div>
+
+    <!-- Resultados de Comparación -->
+    <div *ngIf="showComparison && comparisonResults.length > 0" class="comparison-results">
+      <h3>Search Comparison Results</h3>
+      <div class="comparison-cards">
+        <div *ngFor="let result of comparisonResults" class="comparison-card">
+          <div class="card-header">
+            <h4>{{ result.engine === 'chromadb' ? 'ChromaDB' : 'MySQL' }}</h4>
+            <span class="config-badge" *ngIf="result.config">{{ result.config }}</span>
+            <span class="time-badge-large">{{ result.search_time.toFixed(3) }}s</span>
+          </div>
+          <div class="card-stats">
+            <div class="stat">
+              <label>Results:</label>
+              <span>{{ result.total_results }}</span>
+            </div>
+            <div class="stat" *ngIf="result.max_distance">
+              <label>Max Distance:</label>
+              <span>{{ result.max_distance }}</span>
+            </div>
+          </div>
+          <div class="card-preview">
+            <div *ngFor="let doc of result.results.slice(0, 3)" class="preview-doc">
+              <div class="doc-title">{{ doc.article_title }}</div>
+              <div class="doc-meta">
+                <span>{{ doc.authors.join(', ') }}</span>
+                <span>{{ doc.year }}</span>
+                <span *ngIf="doc.distance">Distance: {{ doc.distance.toFixed(4) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -141,7 +222,7 @@
           <!-- Documents Table -->
           <div class="documents-table">
             <div class="table-header">
-              <div class="col-index">#</div> <!-- Nueva columna para el índice -->
+              <div class="col-index">#</div>
               <div class="col-checkbox">
                 <input 
                   type="checkbox" 
@@ -154,7 +235,7 @@
               <div class="col-source">Source</div>
               <div class="col-year">Year</div>
               <div class="col-citations">Citations</div>
-              <div class="col-distance">Distance</div>
+              <div class="col-distance" *ngIf="searchEngine === 'chromadb'">Distance</div>
             </div>
 
             <div 
@@ -162,7 +243,7 @@
               class="table-row"
               [class.expanded]="showAbstractId === doc.id"
             >
-              <div class="col-index">{{ doc.index }}</div> <!-- Mostrar índice -->
+              <div class="col-index">{{ doc.index }}</div>
               <div class="col-checkbox">
                 <input 
                   type="checkbox" 
@@ -185,7 +266,7 @@
               <div class="col-source">{{ doc.source_title }}</div>
               <div class="col-year">{{ doc.year }}</div>
               <div class="col-citations">{{ doc.citations }}</div>
-              <div class="col-distance">{{ doc.distance?.toFixed(4) || 'N/A' }}</div> 
+              <div class="col-distance" *ngIf="searchEngine === 'chromadb'">{{ doc.distance?.toFixed(4) || 'N/A' }}</div> 
 
               <!-- Expanded Abstract Section -->
               <div *ngIf="showAbstractId === doc.id" class="abstract-expansion">
@@ -243,14 +324,6 @@
               [disabled]="currentPage === totalPages"
               (click)="nextPage()">
               Next
-            </button>
-          </div>
-
-          <!-- Show All Abstracts Toggle -->
-          <div class="show-all-abstracts">
-            <button class="btn-text">
-              <i class="material-icons">unfold_more</i>
-              Show all abstracts
             </button>
           </div>
         </div>

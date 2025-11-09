@@ -6,7 +6,7 @@ import time
 import pymysql
 import logging
 from config import Config
-from models import User
+from models import User, Document
 from auth import auth_utils, aes_encryption
 
 # Configurar logging
@@ -191,10 +191,77 @@ def login():
         logger.error(f"❌ Login error: {str(e)}", exc_info=True)
         return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
+# ========== NUEVOS ENDPOINTS PARA DOCUMENTOS ==========
+
+@app.route('/api/documents/search', methods=['GET'])
+def search_documents():
+    """Búsqueda tradicional en MySQL"""
+    try:
+        query = request.args.get('q', '')
+        search_within = request.args.get('searchWithin', 'all-fields')
+        limit = int(request.args.get('limit', 10))
+        offset = int(request.args.get('offset', 0))
+        
+        if not query:
+            return jsonify({'error': 'Query parameter "q" is required'}), 400
+        
+        start_time = time.time()
+        
+        # Realizar búsqueda en MySQL
+        result = Document.search_documents(
+            query=query,
+            search_within=search_within,
+            limit=limit,
+            offset=offset
+        )
+        
+        search_time = time.time() - start_time
+        
+        return jsonify({
+            'query': query,
+            'search_type': 'traditional',
+            'search_within': search_within,
+            'total_results': result['total_count'],
+            'offset': offset,
+            'limit': limit,
+            'search_time': search_time,
+            'results': result['documents']
+        })
+        
+    except Exception as e:
+        logger.error(f'❌ MySQL search failed: {str(e)}')
+        return jsonify({'error': f'Search failed: {str(e)}'}), 500
+
+@app.route('/api/documents/<int:doc_id>', methods=['GET'])
+def get_document(doc_id):
+    """Obtener documento específico desde MySQL"""
+    try:
+        document = Document.get_document_by_id(doc_id)
+        
+        if not document:
+            return jsonify({'error': 'Document not found'}), 404
+            
+        return jsonify(document)
+        
+    except Exception as e:
+        logger.error(f'❌ Error getting document {doc_id}: {str(e)}')
+        return jsonify({'error': f'Failed to get document: {str(e)}'}), 500
+
+@app.route('/api/documents/init-sample', methods=['POST'])
+def init_sample_documents():
+    """Inicializar documentos de ejemplo (para testing)"""
+    try:
+        count = Document.insert_sample_documents()
+        return jsonify({
+            'message': f'Successfully inserted {count} sample documents',
+            'count': count
+        })
+    except Exception as e:
+        logger.error(f'❌ Error inserting sample documents: {str(e)}')
+        return jsonify({'error': f'Failed to insert sample documents: {str(e)}'}), 500
+
 if __name__ == '__main__':
     logger.info("🚀 Starting Flask development server...")
-    # Usar 0.0.0.0 para que sea accesible desde fuera del contenedor
-    # y deshabilitar el reloader en Docker
     app.run(
         host='0.0.0.0', 
         port=5000, 

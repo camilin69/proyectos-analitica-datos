@@ -1,10 +1,10 @@
-# documents_backend/database.py
 import chromadb
 from typing import List, Dict, Any
 import json
 import logging
 import time
 import os
+import numpy as np
 from config import config
 
 class VectorDatabase:
@@ -15,9 +15,41 @@ class VectorDatabase:
         self.collection = None
         self.collection_name = "research_documents"
         
+        # Configuraciones HNSW para comparación
+        self.hnsw_configs = {
+            'default': {
+                'description': 'Configuración por defecto de ChromaDB',
+                'hnsw:space': 'cosine',
+                'hnsw:construction_ef': 100,
+                'hnsw:search_ef': 100,
+                'hnsw:M': 16
+            },
+            'high_precision': {
+                'description': 'Alta precisión, mayor tiempo de búsqueda',
+                'hnsw:space': 'cosine', 
+                'hnsw:construction_ef': 200,
+                'hnsw:search_ef': 200,
+                'hnsw:M': 32
+            },
+            'fast_search': {
+                'description': 'Búsqueda rápida, menor precisión',
+                'hnsw:space': 'cosine',
+                'hnsw:construction_ef': 50,
+                'hnsw:search_ef': 50,
+                'hnsw:M': 8
+            },
+            'balanced': {
+                'description': 'Balance entre precisión y velocidad',
+                'hnsw:space': 'cosine',
+                'hnsw:construction_ef': 150,
+                'hnsw:search_ef': 100,
+                'hnsw:M': 16
+            }
+        }
+        
         logging.info("🚀 Inicializando VectorDatabase...")
         self._connect()
-    
+
     def _connect(self):
         """Conectar a ChromaDB con reintentos"""
         for attempt in range(self.max_retries):
@@ -32,6 +64,7 @@ class VectorDatabase:
                 heartbeat = self.client.heartbeat()
                 logging.info(f"✅ ChromaDB heartbeat: {heartbeat}")
                 
+                # Intentar obtener colección existente
                 try:
                     self.collection = self.client.get_collection(self.collection_name)
                     logging.info(f"✅ Colección '{self.collection_name}' cargada")
@@ -39,9 +72,11 @@ class VectorDatabase:
                     logging.warning(f"⚠️ Colección no encontrada, creando nueva: {e}")
                     self.collection = self.client.create_collection(
                         name=self.collection_name,
-                        metadata={"description": "Document embeddings for semantic search"}
+                        metadata={"description": "Document embeddings for semantic search"},
+                        # Usar configuración balanceada por defecto
+                        **self.hnsw_configs['balanced']
                     )
-                    logging.info(f"✅ Nueva colección '{self.collection_name}' creada")
+                    logging.info(f"✅ Nueva colección '{self.collection_name}' creada con configuración HNSW balanceada")
                 
                 test_count = self.collection.count()
                 logging.info(f"📊 Colección lista con {test_count} documentos")
@@ -57,63 +92,47 @@ class VectorDatabase:
                     logging.error(f"❌ No se pudo conectar a ChromaDB después de {self.max_retries} intentos")
                     self.collection = None
 
-    def get_all_documents_metadata(self) -> List[Dict[str, Any]]:
-        """Obtener todos los documentos con sus metadatos completos"""
-        try:
-            if self.collection is None:
-                self._connect()
-                if self.collection is None:
-                    return []
-            
-            # Obtener todos los documentos
-            all_docs = self.collection.get(
-                include=['metadatas']
-            )
-            
-            documents = []
-            for i, metadata in enumerate(all_docs['metadatas']):
-                doc_id = int(all_docs['ids'][i])
-                documents.append({
-                    'id': doc_id,
-                    'metadata': metadata
-                })
-            
-            logging.info(f"📄 Obtenidos {len(documents)} documentos de ChromaDB")
-            return documents
-            
-        except Exception as e:
-            logging.error(f"❌ Error obteniendo documentos de ChromaDB: {e}")
-            return []
+    # En documents_backend/database.py - actualizar el método search_similar_with_config
 
-    def search_similar(self, query: str, n_results: int = 10, max_distance: float = 2.0) -> List[Dict[str, Any]]:
-        """Busca documentos similares usando embeddings semánticos"""
+    def search_similar_with_config(self, query: str, n_results: int = 10, max_distance: float = 2.0, 
+                                where: dict = None, hnsw_config: str = 'balanced') -> Dict[str, Any]:
+        """
+        Búsqueda semántica con configuración HNSW específica - CORREGIDO
+        """
         try:
             if self.collection is None:
                 self._connect()
                 if self.collection is None:
-                    return []
+                    return {'results': [], 'search_time': 0, 'total_results': 0}
             
-            logging.info(f"🔍 Ejecutando búsqueda semántica: '{query}' (n_results: {n_results}, max_distance: {max_distance})")
+            logging.info(f"🔍 Ejecutando búsqueda semántica con config {hnsw_config}: '{query}'")
             
             # Obtener el número total de documentos
             total_docs = self.collection.count()
-            
-            # Ajustar n_results si es mayor que el total de documentos
             actual_n_results = min(n_results, total_docs)
+            
+            # Configuración HNSW - ChromaDB maneja esto internamente, no necesitamos modify()
+            config_params = self.hnsw_configs.get(hnsw_config, self.hnsw_configs['balanced'])
+            
+            # Medir tiempo de búsqueda
+            start_time = time.time()
             
             results = self.collection.query(
                 query_texts=[query],
+                where=where,
                 n_results=actual_n_results,
                 include=['metadatas', 'distances', 'documents']
             )
             
+            search_time = time.time() - start_time
+            
+            # Formatear resultados
             formatted_results = []
             for i, (metadata, distance, document_text) in enumerate(zip(
                 results['metadatas'][0],
                 results['distances'][0],
                 results['documents'][0]
             )):
-                # Solo incluir resultados que cumplan con la distancia máxima
                 if distance <= max_distance:
                     formatted_results.append({
                         'id': int(results['ids'][0][i]),
@@ -122,47 +141,55 @@ class VectorDatabase:
                         'document_text': document_text
                     })
             
-            # Ordenar por distancia ascendente (menor distancia primero)
+            # Ordenar por distancia ascendente
             formatted_results.sort(key=lambda x: x['distance'])
             
-            logging.info(f"✅ Búsqueda semántica encontró {len(formatted_results)} resultados para: '{query}'")
-            
-            # Debug: mostrar primeros resultados con distancias
-            if formatted_results:
-                for i, result in enumerate(formatted_results[:3]):
-                    logging.debug(f"Resultado {i+1}: ID={result['id']}, Distance={result['distance']:.4f}")
-            
-            return formatted_results
-            
-        except Exception as e:
-            logging.error(f"❌ Error en búsqueda semántica: {e}")
-            return []
-
-    def get_document_by_id(self, doc_id: int) -> Dict[str, Any]:
-        """Obtener un documento específico por ID"""
-        try:
-            if self.collection is None:
-                self._connect()
-                if self.collection is None:
-                    return None
-            
-            result = self.collection.get(
-                ids=[str(doc_id)],
-                include=['metadatas', 'documents']
-            )
-            
-            if not result['ids']:
-                return None
-            
-            metadata = result['metadatas'][0]
-            document_text = result['documents'][0]
+            logging.info(f"✅ Búsqueda con {hnsw_config} encontró {len(formatted_results)} resultados en {search_time:.6f}s")
             
             return {
-                'id': doc_id,
-                'metadata': metadata,
-                'document_text': document_text
+                'results': formatted_results,
+                'search_time': search_time,
+                'total_results': len(formatted_results),
+                'config': hnsw_config
             }
             
         except Exception as e:
-            logging.error(f"❌ Error obteniendo documento {doc_id}: {e}")
-            return None
+            logging.error(f"❌ Error en búsqueda semántica con config {hnsw_config}: {e}")
+            return {'results': [], 'search_time': 0, 'total_results': 0}
+
+    def search_similar_comparative(self, query: str, n_results: int = 10, max_distance: float = 2.0, 
+                             where: dict = None) -> Dict[str, Any]:
+        """
+        Comparar todas las configuraciones HNSW - CORREGIDO
+        """
+        comparison_results = {}
+        
+        for config_name in self.hnsw_configs.keys():
+            result = self.search_similar_with_config(
+                query=query,
+                n_results=n_results,
+                max_distance=max_distance,
+                where=where,
+                hnsw_config=config_name
+            )
+            
+            comparison_results[config_name] = {
+                'results': result['results'],
+                'search_time': result['search_time'],
+                'total_results': result['total_results'],
+                'config_description': self.hnsw_configs[config_name]['description']
+            }
+        
+        return comparison_results
+
+    def search_similar(self, query: str, n_results: int = 10, max_distance: float = 2.0, 
+                      where: dict = None, hnsw_config: str = 'balanced') -> List[Dict[str, Any]]:
+        """Busca documentos similares usando embeddings semánticos"""
+        result = self.search_similar_with_config(
+            query=query,
+            n_results=n_results,
+            max_distance=max_distance,
+            where=where,
+            hnsw_config=hnsw_config
+        )
+        return result['results']

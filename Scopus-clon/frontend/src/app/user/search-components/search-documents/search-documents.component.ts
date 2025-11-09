@@ -24,13 +24,33 @@ export class SearchDocumentsComponent implements OnInit {
   bellIconUrl: SafeResourceUrl;
 
   searchTerm: string = '';
-  searchWithin: string = 'title-abstract-keywords';
+  searchWithin: string = 'title and abstract and keywords';
   maxDistance: number = 1;
   
   searchWithinOptions = [
     { value: 'all-fields', label: 'All fields' },
-    { value: 'title-abstract-keywords', label: 'Article title, Abstract, Keywords' },
-    // ... resto de opciones
+    { value: 'title and abstract and keywords', label: 'Article title, Abstract, Keywords' },
+    { value: 'article_title', label: 'Article title' },
+    { value: 'abstract', label: 'Abstract' },
+    { value: 'keywords', label: 'Keywords' },
+    { value: 'authors', label: 'Authors' },
+    { value: 'institution', label: 'Institution' },
+    { value: 'funding', label: 'Funding' },
+    { value: 'language', label: 'Language' },
+    { value: 'issn', label: 'ISSN' },
+    { value: 'coden', label: 'CODEN' },
+    { value: 'doi', label: 'DOI' },
+    { value: 'references', label: 'References' },
+    { value: 'coderence', label: 'Coderence' },
+    { value: 'chemical_name', label: 'Chemical name' },
+    { value: 'cas_number', label: 'CAS number' },
+    { value: 'orcid', label: 'ORCID' },
+    { value: 'publication_date', label: 'Publication date' },
+    { value: 'document_type', label: 'Document type' },
+    { value: 'content', label: 'Content' },
+    { value: 'subject_areas', label: 'Subject areas' },
+    { value: 'source_title', label: 'Source title' },
+    { value: 'publisher', label: 'Publisher' }
   ];
 
   constructor() {
@@ -47,6 +67,9 @@ export class SearchDocumentsComponent implements OnInit {
       if (params['q']) {
         this.searchTerm = params['q'];
       }
+      if (params['searchWithin']) {
+        this.searchWithin = params['searchWithin'];
+      }
       if (params['max_distance']) {
         this.maxDistance = parseFloat(params['max_distance']);
       }
@@ -58,13 +81,13 @@ export class SearchDocumentsComponent implements OnInit {
       this.router.navigate(['/results-documents'], { 
         queryParams: { 
           q: this.searchTerm,
+          searchWithin: this.searchWithin,
           max_distance: this.maxDistance,
         } 
       });
     }
   }
 
-  // ... resto de los métodos sin cambios
   onMaxDistanceInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     let value = input.value;
@@ -125,7 +148,6 @@ export class SearchDocumentsComponent implements OnInit {
     this.maxDistance = this.applyRangeValidation(numericValue);
   }
 
-  // Método auxiliar para aplicar validación de rango
   private applyRangeValidation(value: number): number {
     let finalValue = value;
     
