@@ -805,6 +805,516 @@ def create_sample_documents():
             "subject_areas": ["Gemelos Digitales", "Ciudades Inteligentes", "Internet de las Cosas"],
             "source_title": "Sustainable Cities and Society",
             "publisher": "Elsevier"
+        },
+        {
+            "id": 16,
+            "article_title": "Redes Neuronales Convolucionales para Diagnóstico de Enfermedades Oculares",
+            "abstract": "Sistema de deep learning que analiza imágenes de retina para detectar retinopatía diabética y glaucoma con precisión clínica.",
+            "authors": ["Dra. María González", "Dr. Javier López", "Ing. Ana Martínez"],
+            "keywords": ["deep_learning", "oftalmología", "retinopatía_diabética", "glaucoma", "diagnóstico_asistido"],
+            "institution": random.choice(institutions),
+            "funding": random.choice(fundings),
+            "language": "Español",
+            "issn": "6678-9012",
+            "coden": "DLOPH16",
+            "doi": "10.1234/dl.oph.2024.016",
+            "references": [
+                {"id": 1, "reference_text": "Gulshan, V. (2023). Development and Validation of a Deep Learning Algorithm for Detection of Diabetic Retinopathy in Retinal Fundus Photographs. JAMA, 316(22), 2402-2410."},
+                {"id": 2, "reference_text": "Ting, D. S. W. (2022). Artificial intelligence and deep learning in ophthalmology. British Journal of Ophthalmology, 103(2), 167-175."}
+            ],
+            "coderence": "OPHTHA2024P16",
+            "chemical_name": "N/A",
+            "cas_number": "N/A",
+            "orcid": "0000-0002-1825-0112",
+            "publication_date": "2024-07-10",
+            "cites_count": 134,
+            "document_type": "Artículo de investigación",
+            "content": {
+                "sections": [
+                    {
+                        "title": "Introducción",
+                        "text": "Las enfermedades oculares como la retinopatía diabética son causas principales de ceguera evitable. El diagnóstico temprano mediante screening automatizado puede salvar la visión de millones."
+                    },
+                    {
+                        "title": "Metodología",
+                        "text": "Entrenamos una CNN en 100,000 imágenes de fondo de ojo etiquetadas por oftalmólogos. Utilizamos transfer learning con ResNet-152 y fine-tuning para adaptación específica."
+                    },
+                    {
+                        "title": "Validación",
+                        "text": "En dataset independiente de 15,000 imágenes, el modelo alcanzó 98.2% de sensibilidad y 96.8% de especificidad, superando a 4 de 5 oftalmólogos humanos en el estudio."
+                    },
+                    {
+                        "title": "Implementación Clínica",
+                        "text": "El sistema se implementó en 10 centros de salud primaria, permitiendo screening a población rural con acceso limitado a especialistas."
+                    },
+                    {
+                        "title": "Impacto",
+                        "text": "Detección temprana de 450 casos de retinopatía diabética en fase tratable. Reducción del 60% en referencia innecesaria a especialistas."
+                    }
+                ]
+            },
+            "subject_areas": ["Deep Learning", "Oftalmología", "Diagnóstico Médico"],
+            "source_title": "Ophthalmology Journal",
+            "publisher": "Elsevier"
+        },
+        {
+            "id": 17,
+            "article_title": "Algoritmos de Compresión de Datos para IoT de Bajo Consumo",
+            "abstract": "Nuevos algoritmos de compresión lossless optimizados para dispositivos IoT con recursos computacionales y energéticos limitados.",
+            "authors": ["Dr. Carlos Ruiz", "Ing. Laura Díaz", "Dr. Miguel Sánchez"],
+            "keywords": ["compresión_datos", "iot", "eficiencia_energética", "edge_computing", "algoritmos"],
+            "institution": random.choice(institutions),
+            "funding": random.choice(fundings),
+            "language": "Español",
+            "issn": "7789-0123",
+            "coden": "COMPI17",
+            "doi": "10.1234/comp.iot.2024.017",
+            "references": [
+                {"id": 1, "reference_text": "Ziv, J. (2023). A universal algorithm for sequential data compression. IEEE Transactions on Information Theory, 23(3), 337-343."},
+                {"id": 2, "reference_text": "Wang, Y. (2022). Energy-efficient data compression for IoT devices. IEEE Internet of Things Journal, 9(4), 2456-2468."}
+            ],
+            "coderence": "IOTCOM2024Q17",
+            "chemical_name": "N/A",
+            "cas_number": "N/A",
+            "orcid": "0000-0002-1825-0113",
+            "publication_date": "2024-08-15",
+            "cites_count": 89,
+            "document_type": "Artículo de investigación",
+            "content": {
+                "sections": [
+                    {
+                        "title": "Introducción",
+                        "text": "Los dispositivos IoT generan grandes volúmenes de datos pero tienen limitaciones severas de energía y ancho de banda. La compresión eficiente es esencial para su viabilidad."
+                    },
+                    {
+                        "title": "Algoritmo Propuesto",
+                        "text": "Desarrollamos LZ-Adaptive, variante de Lempel-Ziv optimizada para sensores IoT. Incluye predicción contextual y codificación adaptativa basada en patrones de datos de sensores."
+                    },
+                    {
+                        "title": "Evaluación",
+                        "text": "Comparado con gzip y LZ4, nuestro algoritmo reduce 45% el consumo energético manteniendo tasas de compresión similares. Eficiente en microcontroladores ARM Cortex-M0+."
+                    },
+                    {
+                        "title": "Aplicaciones",
+                        "text": "Implementado en redes de sensores ambientales, wearables médicos y agricultura de precisión. Extiende vida de batería de 30 días a 45 días en casos típicos."
+                    },
+                    {
+                        "title": "Futuro",
+                        "text": "Trabajamos en versión hardware del algoritmo para mayor eficiencia energética e integración directa en chips IoT."
+                    }
+                ]
+            },
+            "subject_areas": ["Compresión de Datos", "Internet de las Cosas", "Algoritmos"],
+            "source_title": "IEEE Internet of Things Journal",
+            "publisher": "IEEE"
+        },
+        {
+            "id": 18,
+            "article_title": "Sistemas Multiagente para Gestión de Tráfico Urbano Inteligente",
+            "abstract": "Arquitectura multiagente que optimiza flujo vehicular mediante coordinación descentralizada de semáforos y gestión dinámica de carriles.",
+            "authors": ["Dr. Andrés Morales", "Ing. Patricia López", "Dra. Carmen Ruiz"],
+            "keywords": ["sistemas_multiagente", "tráfico_urbano", "optimización", "movilidad", "ciudades_inteligentes"],
+            "institution": random.choice(institutions),
+            "funding": random.choice(fundings),
+            "language": "Español",
+            "issn": "8890-1234",
+            "coden": "SMATR18",
+            "doi": "10.1234/sma.traffic.2024.018",
+            "references": [
+                {"id": 1, "reference_text": "Wooldridge, M. (2023). An Introduction to MultiAgent Systems. John Wiley & Sons."},
+                {"id": 2, "reference_text": "Chen, B. (2022). Intelligent traffic control using multi-agent reinforcement learning. Transportation Research Part C, 124, 102893."}
+            ],
+            "coderence": "TRAFFI2024R18",
+            "chemical_name": "N/A",
+            "cas_number": "N/A",
+            "orcid": "0000-0002-1825-0114",
+            "publication_date": "2024-09-05",
+            "cites_count": 112,
+            "document_type": "Artículo de investigación",
+            "content": {
+                "sections": [
+                    {
+                        "title": "Introducción",
+                        "text": "La congestión vehicular en ciudades causa pérdidas económicas masivas y contaminación. Enfoques centralizados son incapaces de manejar la complejidad del tráfico en tiempo real."
+                    },
+                    {
+                        "title": "Arquitectura Multiagente",
+                        "text": "Cada intersección es controlada por un agente autónomo que negocia con agentes vecinos. Los agentes de vehículos comunican destinos para routing predictivo."
+                    },
+                    {
+                        "title": "Algoritmo de Coordinación",
+                        "text": "Usamos Q-learning multiagente con transferencia de conocimiento entre agentes. Cada agente aprende políticas óptimas basadas en tráfico local y global."
+                    },
+                    {
+                        "title": "Simulaciones",
+                        "text": "En simulación de ciudad de 500 intersecciones, redujimos tiempo promedio de viaje en 32% y emisiones CO2 en 18% vs sistemas tradicionales."
+                    },
+                    {
+                        "title": "Despliegue Piloto",
+                        "text": "Implementado en distrito de 25 intersecciones. Resultados preliminares muestran 25% reducción congestión en horas pico y 40% menos paradas por vehículo."
+                    }
+                ]
+            },
+            "subject_areas": ["Sistemas Multiagente", "Transporte", "Inteligencia Artificial"],
+            "source_title": "Transportation Research Part C",
+            "publisher": "Elsevier"
+        },
+        {
+            "id": 19,
+            "article_title": "Machine Learning para Predicción de Fallas en Turbinas Eólicas",
+            "abstract": "Sistema predictivo que combina datos SCADA y vibración para anticipar fallas en componentes críticos de turbinas eólicas, reduciendo downtime.",
+            "authors": ["Ing. Roberto Castro", "Dra. Elena Mendoza", "Dr. Carlos Ortega"],
+            "keywords": ["predictive_maintenance", "energía_eólica", "machine_learning", "análisis_vibraciones", "SCADA"],
+            "institution": random.choice(institutions),
+            "funding": random.choice(fundings),
+            "language": "Español",
+            "issn": "9901-2345",
+            "coden": "MLWIND19",
+            "doi": "10.1234/ml.wind.2024.019",
+            "references": [
+                {"id": 1, "reference_text": "Tchakoua, P. (2023). A review of concepts and methods for wind turbines condition monitoring. Wind Energy, 22(4), 465-495."},
+                {"id": 2, "reference_text": "Lei, Y. (2022). Machinery health prognostics: A systematic review from data acquisition to RUL prediction. Mechanical Systems and Signal Processing, 104, 799-834."}
+            ],
+            "coderence": "WINDPR2024S19",
+            "chemical_name": "N/A",
+            "cas_number": "N/A",
+            "orcid": "0000-0002-1825-0115",
+            "publication_date": "2024-10-12",
+            "cites_count": 156,
+            "document_type": "Artículo de investigación",
+            "content": {
+                "sections": [
+                    {
+                        "title": "Introducción",
+                        "text": "Las fallas en turbinas eólicas causan downtime costoso y pérdida de producción energética. El mantenimiento predictivo puede anticipar problemas semanas antes de la falla catastrófica."
+                    },
+                    {
+                        "title": "Metodología",
+                        "text": "Combinamos 150 parámetros SCADA con datos de vibración de 20 sensores por turbina. Usamos XGBoost para clasificación y LSTM para predicción de RUL (Remaining Useful Life)."
+                    },
+                    {
+                        "title": "Dataset",
+                        "text": "Datos de 200 turbinas durante 5 años, incluyendo 45 fallas documentadas de rodamientos, engranajes y palas. Total de 2.5TB de datos temporales."
+                    },
+                    {
+                        "title": "Resultados",
+                        "text": "El sistema predice fallas de rodamientos con 94% de precisión y 30 días de anticipación. Falsos positivos reducidos a 3% mediante ensemble de modelos."
+                    },
+                    {
+                        "title": "Impacto Económico",
+                        "text": "Implementación en parque eólico de 50 turbinas: ahorro estimado de $2.5M anuales por reducción de downtime y mantenimiento preventivo optimizado."
+                    }
+                ]
+            },
+            "subject_areas": ["Machine Learning", "Energía Eólica", "Mantenimiento Predictivo"],
+            "source_title": "Renewable Energy Focus",
+            "publisher": "Elsevier"
+        },
+        {
+            "id": 20,
+            "article_title": "Blockchain para Trazabilidad de Cadena Alimentaria",
+            "abstract": "Sistema blockchain que garantiza trazabilidad completa desde productor hasta consumidor en cadena de suministro alimentario, mejorando seguridad y transparencia.",
+            "authors": ["Dra. Sofía Herrera", "Ing. Javier Ramírez", "Dr. Antonio López"],
+            "keywords": ["blockchain", "trazabilidad", "cadena_alimentaria", "seguridad_alimentaria", "supply_chain"],
+            "institution": random.choice(institutions),
+            "funding": random.choice(fundings),
+            "language": "Español",
+            "issn": "1012-3456",
+            "coden": "BLFOOD20",
+            "doi": "10.1234/block.food.2024.020",
+            "references": [
+                {"id": 1, "reference_text": "Tian, F. (2023). A blockchain-based food supply chain traceability system. Business Process Management Journal, 26(5), 1257-1274."},
+                {"id": 2, "reference_text": "Kamilaris, A. (2022). The rise of blockchain technology in agriculture and food supply chains. Trends in Food Science & Technology, 91, 640-652."}
+            ],
+            "coderence": "FOODTR2024T20",
+            "chemical_name": "N/A",
+            "cas_number": "N/A",
+            "orcid": "0000-0002-1825-0116",
+            "publication_date": "2024-11-08",
+            "cites_count": 178,
+            "document_type": "Artículo de investigación",
+            "content": {
+                "sections": [
+                    {
+                        "title": "Introducción",
+                        "text": "Los recientes escándalos de seguridad alimentaria demuestran la necesidad de sistemas de trazabilidad confiables e inmutables. Blockchain ofrece solución ideal para este problema."
+                    },
+                    {
+                        "title": "Arquitectura",
+                        "text": "Implementamos blockchain permissioned con Hyperledger Fabric. Cada participante (agricultor, procesador, distribuidor, minorista) tiene nodo validador. IoT sensors capturan datos automáticamente."
+                    },
+                    {
+                        "title": "Protocolo de Consenso",
+                        "text": "Practical Byzantine Fault Tolerance (PBFT) optimizado para alta throughput (1000+ transacciones/segundo) con latencia menor a 2 segundos."
+                    },
+                    {
+                        "title": "Caso de Estudio",
+                        "text": "Implementado en cadena de suministro de carne vacuna. Tiempo de trazabilidad reducido de 7 días a 2 segundos. Detección inmediata de lote contaminado en prueba controlada."
+                    },
+                    {
+                        "title": "Adopción",
+                        "text": "15 empresas alimentarias ya utilizan el sistema. Certificación orgánica automatizada y reducción de 85% en reclamos por calidad."
+                    }
+                ]
+            },
+            "subject_areas": ["Blockchain", "Seguridad Alimentaria", "Trazabilidad"],
+            "source_title": "Food Control",
+            "publisher": "Elsevier"
+        },
+        {
+            "id": 21,
+            "article_title": "Computer Vision para Inspección Automatizada de Calidad en Manufactura",
+            "abstract": "Sistema de visión artificial que detecta defectos en piezas manufacturadas con precisión superior a inspectores humanos, operando en líneas de producción en tiempo real.",
+            "authors": ["Ing. Carlos Díaz", "Dra. Laura Martínez", "Dr. Ricardo Sánchez"],
+            "keywords": ["computer_vision", "control_calidad", "manufactura", "detección_defectos", "automation"],
+            "institution": random.choice(institutions),
+            "funding": random.choice(fundings),
+            "language": "Español",
+            "issn": "1123-4567",
+            "coden": "CVQUAL21",
+            "doi": "10.1234/cv.qual.2024.021",
+            "references": [
+                {"id": 1, "reference_text": "Wang, J. (2023). Deep learning for smart manufacturing: Methods and applications. Journal of Manufacturing Systems, 48, 144-156."},
+                {"id": 2, "reference_text": "Luo, Q. (2022). A survey of surface defect inspection methods based on deep learning. Acta Automatica Sinica, 48(1), 1-18."}
+            ],
+            "coderence": "QUALCV2024U21",
+            "chemical_name": "N/A",
+            "cas_number": "N/A",
+            "orcid": "0000-0002-1825-0117",
+            "publication_date": "2024-12-15",
+            "cites_count": 203,
+            "document_type": "Artículo de investigación",
+            "content": {
+                "sections": [
+                    {
+                        "title": "Introducción",
+                        "text": "La inspección visual manual en manufactura es costosa, subjetiva y propensa a errores. La automatización mediante computer vision mejora calidad y reduce costos."
+                    },
+                    {
+                        "title": "Sistema Desarrollado",
+                        "text": "Arquitectura con múltiples cámaras de alta resolución, iluminación controlada y modelo YOLOv5 customizado. Procesamiento a 120 frames/segundo en GPU edge."
+                    },
+                    {
+                        "title": "Tipos de Defectos",
+                        "text": "Detecta 15 categorías de defectos: rayaduras, abolladuras, descoloramiento, inclusiones, porosidad, dimensiones fuera de tolerancia, etc."
+                    },
+                    {
+                        "title": "Rendimiento",
+                        "text": "Precisión: 99.7%, Recall: 98.9%, F1-score: 99.3%. Supera a inspectores humanos que promedian 92% de precisión con fatiga decreciente."
+                    },
+                    {
+                        "title": "ROI",
+                        "text": "En fábrica de componentes automotrices: retorno de inversión en 8 meses, reducción de 95% en productos defectuosos enviados a cliente."
+                    }
+                ]
+            },
+            "subject_areas": ["Computer Vision", "Manufactura", "Control de Calidad"],
+            "source_title": "Journal of Manufacturing Systems",
+            "publisher": "Elsevier"
+        },
+        {
+            "id": 22,
+            "article_title": "Análisis de Datos Genómicos para Medicina Personalizada",
+            "abstract": "Pipeline de análisis que integra datos genómicos, transcriptómicos y clínicos para predecir respuesta a tratamientos y riesgo de enfermedades.",
+            "authors": ["Dra. Ana Rodríguez", "Dr. Miguel Castro", "Bioinf. Laura Hernández"],
+            "keywords": ["bioinformática", "genómica", "medicina_personalizada", "análisis_genético", "salud_precision"],
+            "institution": random.choice(institutions),
+            "funding": random.choice(fundings),
+            "language": "Español",
+            "issn": "2234-5678",
+            "coden": "GENMED22",
+            "doi": "10.1234/gen.med.2024.022",
+            "references": [
+                {"id": 1, "reference_text": "Collins, F. S. (2023). The Human Genome Project: lessons from large-scale biology. Science, 300(5617), 286-290."},
+                {"id": 2, "reference_text": "Hasin, Y. (2022). Multi-omics approaches to disease. Genome Biology, 18(1), 1-15."}
+            ],
+            "coderence": "GENOMI2024V22",
+            "chemical_name": "N/A",
+            "cas_number": "N/A",
+            "orcid": "0000-0002-1825-0118",
+            "publication_date": "2024-01-20",
+            "cites_count": 267,
+            "document_type": "Artículo de investigación",
+            "content": {
+                "sections": [
+                    {
+                        "title": "Introducción",
+                        "text": "La medicina personalizada utiliza información genética para adaptar tratamientos a características individuales del paciente, mejorando eficacia y reduciendo efectos secundarios."
+                    },
+                    {
+                        "title": "Metodología",
+                        "text": "Desarrollamos pipeline que integra: secuenciación WGS, RNA-seq, datos clínicos EMR. Usamos ML para identificar biomarkers predictivos y agrupar pacientes por subtipos moleculares."
+                    },
+                    {
+                        "title": "Aplicación en Oncología",
+                        "text": "Analizamos 2,000 pacientes con cáncer. Identificamos 15 firmas genéticas predictivas de respuesta a inmunoterapia. Precisión de 89% en predicción de supervivencia."
+                    },
+                    {
+                        "title": "Implementación Clínica",
+                        "text": "Sistema utilizado en 5 hospitales para guiar decisiones de tratamiento en cáncer de pulmón, mama y colon. Reducción de 35% en tratamientos inefectivos."
+                    },
+                    {
+                        "title": "Desafíos Éticos",
+                        "text": "Desarrollamos framework para consentimiento informado dinámico y gestión segura de datos genéticos sensibles, cumpliendo GDPR y HIPAA."
+                    }
+                ]
+            },
+            "subject_areas": ["Bioinformática", "Genómica", "Medicina Personalizada"],
+            "source_title": "Nature Medicine",
+            "publisher": "Nature Research"
+        },
+        {
+            "id": 23,
+            "article_title": "Reinforcement Learning para Control de Procesos Industriales",
+            "abstract": "Aplicación de deep reinforcement learning para control óptimo de procesos químicos complejos, superando a controladores PID tradicionales.",
+            "authors": ["Ing. Jorge Martínez", "Dr. Carlos Ruiz", "Dra. Elena López"],
+            "keywords": ["reinforcement_learning", "control_procesos", "industria_química", "automatización", "IA_industrial"],
+            "institution": random.choice(institutions),
+            "funding": random.choice(fundings),
+            "language": "Español",
+            "issn": "3345-6789",
+            "coden": "RLIND23",
+            "doi": "10.1234/rl.ind.2024.023",
+            "references": [
+                {"id": 1, "reference_text": "Sutton, R. S. (2023). Reinforcement Learning: An Introduction. MIT Press."},
+                {"id": 2, "reference_text": "Shin, J. (2022). Process control with deep reinforcement learning. Industrial & Engineering Chemistry Research, 59(24), 11235-11249."}
+            ],
+            "coderence": "INDCON2024W23",
+            "chemical_name": "C6H12O6",
+            "cas_number": "50-99-7",
+            "orcid": "0000-0002-1825-0119",
+            "publication_date": "2024-02-14",
+            "cites_count": 145,
+            "document_type": "Artículo de investigación",
+            "content": {
+                "sections": [
+                    {
+                        "title": "Introducción",
+                        "text": "Los procesos químicos industriales son altamente no lineales y multivariables. Los controladores PID tradicionales no alcanzan optimalidad en condiciones dinámicas."
+                    },
+                    {
+                        "title": "Algoritmo Propuesto",
+                        "text": "Deep Deterministic Policy Gradient (DDPG) adaptado para entornos industriales. Incluye safety constraints y transfer learning entre procesos similares."
+                    },
+                    {
+                        "title": "Aplicación en Reactor Químico",
+                        "text": "Control de temperatura, presión y flujos en reactor de polimerización. El agente DRL mantiene parámetros dentro de rango óptimo con 68% menos variación que PID."
+                    },
+                    {
+                        "title": "Resultados",
+                        "text": "Aumento de 12% en yield del producto, reducción de 25% en consumo energético, y 40% menos productos fuera de especificación."
+                    },
+                    {
+                        "title": "Robustez",
+                        "text": "El sistema maneja perturbaciones y cambios en materias primas mejor que controladores adaptativos tradicionales. Auto-calibración en 15 minutos vs 8 horas manuales."
+                    }
+                ]
+            },
+            "subject_areas": ["Reinforcement Learning", "Control de Procesos", "Industria Química"],
+            "source_title": "Industrial & Engineering Chemistry Research",
+            "publisher": "ACS"
+        },
+        {
+            "id": 24,
+            "article_title": "NLP para Análisis de Satisfacción Cliente en Grandes Volúmenes de Texto",
+            "abstract": "Sistema que procesa automáticamente reseñas, quejas y comentarios de clientes para identificar tendencias, sentimientos y áreas de mejora.",
+            "authors": ["Dra. Patricia Morales", "Lic. David Herrera", "Dr. Roberto Díaz"],
+            "keywords": ["nlp", "satisfacción_cliente", "análisis_sentimientos", "text_mining", "CX"],
+            "institution": random.choice(institutions),
+            "funding": random.choice(fundings),
+            "language": "Español",
+            "issn": "4456-7890",
+            "coden": "NLPCUS24",
+            "doi": "10.1234/nlp.cx.2024.024",
+            "references": [
+                {"id": 1, "reference_text": "Liu, B. (2023). Sentiment Analysis: Mining Opinions, Sentiments, and Emotions. Cambridge University Press."},
+                {"id": 2, "reference_text": "Hutto, C. J. (2022). VADER: A Parsimonious Rule-Based Model for Sentiment Analysis of Social Media Text. Proceedings of ICWSM, 8(1), 216-225."}
+            ],
+            "coderence": "CUSTEX2024X24",
+            "chemical_name": "N/A",
+            "cas_number": "N/A",
+            "orcid": "0000-0002-1825-0120",
+            "publication_date": "2024-03-18",
+            "cites_count": 98,
+            "document_type": "Artículo de investigación",
+            "content": {
+                "sections": [
+                    {
+                        "title": "Introducción",
+                        "text": "Las empresas reciben millones de comentarios de clientes en múltiples canales. El análisis manual es imposible, perdiéndose insights valiosos para mejorar productos y servicios."
+                    },
+                    {
+                        "title": "Arquitectura",
+                        "text": "Pipeline que procesa texto de reseñas, emails, redes sociales y surveys. Incluye: limpieza de texto, análisis de sentimientos, topic modeling, extracción de aspectos y detección de urgencia."
+                    },
+                    {
+                        "title": "Modelos",
+                        "text": "BERT fine-tuned para español con dataset de 500,000 reseñas etiquetadas. Precisión de 94% en clasificación de sentimiento y 89% en identificación de temas."
+                    },
+                    {
+                        "title": "Dashboard Ejecutivo",
+                        "text": "Visualización en tiempo real de NPS, tendencias de quejas, temas emergentes y alertas tempranas de crisis de reputación."
+                    },
+                    {
+                        "title": "Caso de Éxito",
+                        "text": "En retail, identificamos problema con nuevo empaque que causaba 23% de quejas. Corrección rápida ahorró $2.3M en pérdidas potenciales."
+                    }
+                ]
+            },
+            "subject_areas": ["Procesamiento de Lenguaje Natural", "Marketing", "Experiencia de Cliente"],
+            "source_title": "Journal of Consumer Research",
+            "publisher": "Oxford University Press"
+        },
+        {
+            "id": 25,
+            "article_title": "Computación en la Nube para Análisis Científico a Gran Escala",
+            "abstract": "Arquitectura cloud-native que permite ejecutar simulaciones científicas y análisis de big data usando recursos escalables bajo demanda.",
+            "authors": ["Ing. Ricardo Castro", "Dr. Laura Mendoza", "Ing. Carlos Ortega"],
+            "keywords": ["cloud_computing", "HPC", "big_data", "escalabilidad", "computación_científica"],
+            "institution": random.choice(institutions),
+            "funding": random.choice(fundings),
+            "language": "Español",
+            "issn": "5567-8901",
+            "coden": "CLOUD25",
+            "doi": "10.1234/cloud.sci.2024.025",
+            "references": [
+                {"id": 1, "reference_text": "Armbrust, M. (2023). A view of cloud computing. Communications of the ACM, 53(4), 50-58."},
+                {"id": 2, "reference_text": "Foster, I. (2022). Cloud computing and grid computing 360-degree compared. Grid Computing Environments Workshop, 1-10."}
+            ],
+            "coderence": "CLOUDC2024Y25",
+            "chemical_name": "N/A",
+            "cas_number": "N/A",
+            "orcid": "0000-0002-1825-0121",
+            "publication_date": "2024-04-22",
+            "cites_count": 167,
+            "document_type": "Artículo de investigación",
+            "content": {
+                "sections": [
+                    {
+                        "title": "Introducción",
+                        "text": "La investigación científica moderna requiere capacidades computacionales masivas que superan los recursos de centros de datos tradicionales. La nube ofrece escalabilidad ilimitada bajo demanda."
+                    },
+                    {
+                        "title": "Arquitectura",
+                        "text": "Kubernetes + Apache Spark + Dask en AWS/Azure. Auto-scaling desde 10 a 10,000 cores según carga. Storage distribuido con S3 para petabytes de datos."
+                    },
+                    {
+                        "title": "Optimización de Costos",
+                        "text": "Algoritmo que mezcla spot instances, reserved instances y on-demand para minimizar costos manteniendo performance. Ahorro promedio de 65% vs HPC tradicional."
+                    },
+                    {
+                        "title": "Casos de Uso",
+                        "text": "Simulación climática (100TB de datos), análisis genómico (1M de genomas), modelado de materiales (10,000 estructuras simultáneas)."
+                    },
+                    {
+                        "title": "Impacto en Investigación",
+                        "text": "Democratiza acceso a supercomputación. Pequeñas universidades y startups pueden ejecutar proyectos que antes requerían inversiones millonarias en infraestructura."
+                    }
+                ]
+            },
+            "subject_areas": ["Computación en la Nube", "HPC", "Big Data"],
+            "source_title": "Future Generation Computer Systems",
+            "publisher": "Elsevier"
         }
     ]
     

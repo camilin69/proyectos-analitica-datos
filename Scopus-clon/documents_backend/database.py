@@ -92,7 +92,53 @@ class VectorDatabase:
                     logging.error(f"❌ No se pudo conectar a ChromaDB después de {self.max_retries} intentos")
                     self.collection = None
 
-    # En documents_backend/database.py - actualizar el método search_similar_with_config
+    def get_document_by_id(self, doc_id: int):
+        """Obtener un documento específico por ID desde ChromaDB"""
+        try:
+            # ChromaDB espera el ID como string
+            doc_id_str = str(doc_id)
+            
+            # Obtener el documento por ID
+            result = self.collection.get(
+                ids=[doc_id_str],
+                include=["metadatas", "documents"]
+            )
+            
+            if not result['ids']:
+                return None
+            
+            # Formatear la respuesta
+            return {
+                'id': doc_id,
+                'metadata': result['metadatas'][0],
+                'document': result['documents'][0] if result['documents'] else ''
+            }
+            
+        except Exception as e:
+            logging.error(f"❌ Error obteniendo documento {doc_id}: {str(e)}")
+            return None
+
+    def get_all_documents_metadata(self):
+        """Obtener todos los documentos con sus metadatos"""
+        try:
+            # Obtener todos los documentos
+            results = self.collection.get(
+                include=["metadatas", "documents"]
+            )
+            
+            documents = []
+            for i, doc_id in enumerate(results['ids']):
+                documents.append({
+                    'id': int(doc_id),  # Convertir a int para consistencia
+                    'metadata': results['metadatas'][i],
+                    'document': results['documents'][i] if results['documents'] else ''
+                })
+            
+            return documents
+            
+        except Exception as e:
+            logging.error(f"❌ Error obteniendo todos los documentos: {str(e)}")
+            return []
 
     def search_similar_with_config(self, query: str, n_results: int = 10, max_distance: float = 2.0, 
                                 where: dict = None, hnsw_config: str = 'balanced') -> Dict[str, Any]:

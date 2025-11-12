@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged, Observable } from 'rxjs';
 import { DocumentService, Document, DocumentSearchResponse, SearchComparisonResult, HNSWConfig } from '../../../services/document.service';
 import { SearchDocumentsComponent } from '../../search-components/search-documents/search-documents.component';
 
@@ -12,6 +12,11 @@ interface ResultsDocument extends Document {
   authorKeywords: string[];
   subjectAreas: string[];
   index?: number; 
+}
+interface HNSWConfigOption {
+  name: string;
+  value: string;
+  description: string;
 }
 
 @Component({
@@ -46,7 +51,9 @@ export class ResultsDocumentsComponent implements OnInit, OnDestroy {
   
   // Configuraciones disponibles
   searchEngines: string[] = [];
-  hnswConfigs: HNSWConfig[] = [];
+  hnswConfigOptions: HNSWConfigOption[] = [];
+
+  hnswConfigs: HNSWConfig = {};
   
   // Estado de carga y errores
   isLoading: boolean = false;
@@ -84,7 +91,7 @@ export class ResultsDocumentsComponent implements OnInit, OnDestroy {
     private documentService: DocumentService
   ) {
     this.searchEngines = this.documentService.getSearchEngines();
-    this.hnswConfigs = this.documentService.getHNSWConfigs();
+    this.loadHNSWConfigs();
   }
 
   ngOnDestroy(): void {
@@ -599,6 +606,31 @@ export class ResultsDocumentsComponent implements OnInit, OnDestroy {
     this.onAuthorFilterChange = (value: string) => authorFilter$.next(value);
     this.onSubjectFilterChange = (value: string) => subjectFilter$.next(value);
     this.onTypeFilterChange = (value: string) => typeFilter$.next(value);
+  }
+
+    loadHNSWConfigs(): void {
+    this.documentService.getHNSWConfigs().subscribe({
+      next: (configs) => {
+        this.hnswConfigs = configs;
+        // Convertir el objeto a array para usar en *ngFor
+        this.hnswConfigOptions = Object.entries(configs).map(([key, value]) => ({
+          name: key,
+          value: key,
+          description: value.description
+        }));
+        console.log('Configuraciones HNSW cargadas:', this.hnswConfigOptions);
+      },
+      error: (error) => {
+        console.error('Error cargando configuraciones HNSW:', error);
+        // Configuraciones por defecto en caso de error
+        this.hnswConfigOptions = [
+          { name: 'balanced', value: 'balanced', description: 'Balance entre precisión y velocidad' },
+          { name: 'default', value: 'default', description: 'Configuración por defecto de ChromaDB' },
+          { name: 'high_precision', value: 'high_precision', description: 'Alta precisión, mayor tiempo de búsqueda' },
+          { name: 'fast_search', value: 'fast_search', description: 'Búsqueda rápida, menor precisión' }
+        ];
+      }
+    });
   }
 
 }

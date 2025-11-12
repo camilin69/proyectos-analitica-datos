@@ -257,6 +257,22 @@ def search_documents():
     except Exception as e:
         logging.error(f'❌ Búsqueda falló: {str(e)}')
         return jsonify({'error': f'Search failed: {str(e)}'}), 500
+    
+@documents_bp.route('/search/get-hnsw-configs', methods=['GET'])
+def get_hnsw_configurations():
+    """Obtener las configuraciones HNSW disponibles"""
+    try:
+        return jsonify({
+            'available_configurations': vector_db.hnsw_configs,
+            'status': 'success'
+        })
+    except Exception as e:
+        logging.error(f'❌ Error obteniendo configuraciones HNSW: {str(e)}')
+        return jsonify({
+            'error': f'Failed to get HNSW configurations: {str(e)}',
+            'status': 'error'
+        }), 500
+
 
 @documents_bp.route('/search/compare-hnsw', methods=['GET'])
 def compare_hnsw_configs():
@@ -357,7 +373,7 @@ def get_document(doc_id):
         result = vector_db.get_document_by_id(doc_id)
         
         if not result:
-            return jsonify({'error': 'Document not found'}), 404
+            return jsonify({'error': f'Document with ID {doc_id} not found'}), 404
         
         # Formatear documento completo
         document = format_document_from_metadata(doc_id, result['metadata'])
@@ -371,6 +387,35 @@ def get_document(doc_id):
         logging.error(f'❌ Error obteniendo documento {doc_id}: {str(e)}')
         return jsonify({'error': f'Failed to get document: {str(e)}'}), 500
 
+@documents_bp.route('/documents', methods=['GET'])
+def get_all_documents():
+    """Obtener todos los documentos (útil para debugging)"""
+    try:
+        limit = int(request.args.get('limit', 50))
+        offset = int(request.args.get('offset', 0))
+        
+        all_docs = vector_db.get_all_documents_metadata()
+        
+        # Aplicar paginación
+        paginated_docs = all_docs[offset:offset + limit]
+        
+        documents = []
+        for doc in paginated_docs:
+            formatted_doc = format_document_from_metadata(doc['id'], doc['metadata'])
+            if formatted_doc:
+                documents.append(formatted_doc)
+        
+        return jsonify({
+            'total_documents': len(all_docs),
+            'offset': offset,
+            'limit': limit,
+            'documents': documents
+        })
+        
+    except Exception as e:
+        logging.error(f'❌ Error obteniendo todos los documentos: {str(e)}')
+        return jsonify({'error': f'Failed to get documents: {str(e)}'}), 500
+    
 @documents_bp.route('/documents/batch', methods=['GET'])
 def get_documents_batch():
     """Obtener múltiples documentos por IDs - SOLO ChromaDB"""

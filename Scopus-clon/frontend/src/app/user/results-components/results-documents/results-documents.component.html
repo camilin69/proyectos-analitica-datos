@@ -23,7 +23,7 @@
         <div *ngIf="searchEngine === 'chromadb'" class="control-group">
           <label>HNSW Config:</label>
           <select [(ngModel)]="hnswConfig" (change)="onHNSWConfigChange()" class="form-select">
-            <option *ngFor="let config of hnswConfigs" [value]="config.name">
+            <option *ngFor="let config of hnswConfigOptions" [value]="config.name">
               {{ config.description }}
             </option>
           </select>

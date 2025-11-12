@@ -1,7 +1,8 @@
 // document.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, forkJoin, map } from 'rxjs';
+import { Observable, forkJoin, map, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { environment } from '../../enviroments/enviroment';
 
 export interface Document {
@@ -104,10 +105,22 @@ export interface SearchComparisonResult {
   max_distance?: number;
 }
 
-export interface HNSWConfig {
-  name: string;
+// EXPORTAR las interfaces HNSW
+export interface HNSWConfiguration {
   description: string;
-  params: any;
+  'hnsw:space': string;
+  'hnsw:construction_ef': number;
+  'hnsw:search_ef': number;
+  'hnsw:M': number;
+}
+
+export interface HNSWConfig {
+  [configName: string]: HNSWConfiguration;
+}
+
+interface HNSWConfigResponse {
+  available_configurations: HNSWConfig;
+  status: string;
 }
 
 @Injectable({
@@ -125,30 +138,6 @@ export class DocumentService {
   private lastMaxDistance: number = 0.1;
   private lastSearchEngine: string = 'chromadb';
   private lastHNSWConfig: string = 'balanced';
-
-  // Configuraciones HNSW disponibles
-  hnswConfigs: HNSWConfig[] = [
-    {
-      name: 'default',
-      description: 'Configuración por defecto',
-      params: { hnsw_space: 'cosine', hnsw_construction_ef: 100, hnsw_search_ef: 100, hnsw_M: 16 }
-    },
-    {
-      name: 'high_precision',
-      description: 'Alta precisión, mayor tiempo',
-      params: { hnsw_space: 'cosine', hnsw_construction_ef: 200, hnsw_search_ef: 200, hnsw_M: 32 }
-    },
-    {
-      name: 'fast_search',
-      description: 'Búsqueda rápida, menor precisión',
-      params: { hnsw_space: 'cosine', hnsw_construction_ef: 50, hnsw_search_ef: 50, hnsw_M: 8 }
-    },
-    {
-      name: 'balanced',
-      description: 'Balance precisión/velocidad',
-      params: { hnsw_space: 'cosine', hnsw_construction_ef: 150, hnsw_search_ef: 100, hnsw_M: 16 }
-    }
-  ];
 
   // Claves para localStorage
   private readonly CACHED_DOCS_KEY = 'cached_documents';
@@ -270,7 +259,7 @@ export class DocumentService {
             config: configName,
             results: data.results || [],
             total_results: data.total_results || 0,
-            search_time: data.search_time || 0, // Tiempo exacto
+            search_time: data.search_time || 0,
             query: response.query,
             search_within: response.search_within,
             max_distance: response.max_distance
@@ -389,20 +378,14 @@ export class DocumentService {
   getDocument(id: number): Observable<DocumentDetails> {
     const cachedDetails = this.getCachedDocumentDetails(id);
     if (cachedDetails) {
-      return new Observable(observer => {
-        observer.next(cachedDetails);
-        observer.complete();
-      });
+      return of(cachedDetails);
     }
 
     const cachedDocument = this.getCachedDocumentById(id);
     if (cachedDocument) {
       const documentDetails = this.mapToDocumentDetails(cachedDocument);
       this.setCachedDocumentDetails(id, documentDetails);
-      return new Observable(observer => {
-        observer.next(documentDetails);
-        observer.complete();
-      });
+      return of(documentDetails);
     }
 
     return this.getDocumentById(id);
@@ -443,9 +426,14 @@ export class DocumentService {
     localStorage.removeItem(this.LAST_SEARCH_KEY);
   }
 
-  // Métodos para obtener configuraciones
-  getHNSWConfigs(): HNSWConfig[] {
-    return this.hnswConfigs;
+  getHNSWConfigs(): Observable<HNSWConfig> {
+    return this.http.get<HNSWConfigResponse>(`${this.apiUrl}/search/get-hnsw-configs`).pipe(
+      map(response => response.available_configurations),
+      catchError(error => {
+        console.error('Error fetching HNSW configs:', error);
+        return of({} as HNSWConfig); 
+      })
+    );
   }
 
   getSearchEngines(): string[] {
